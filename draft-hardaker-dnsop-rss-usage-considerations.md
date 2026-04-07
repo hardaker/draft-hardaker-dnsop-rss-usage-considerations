@@ -117,29 +117,39 @@ resolver, various techniques are available for use that include:
   query per TLD in the root zone in the course of one TTL (2 days) or
   implementation limit (frequently 1 day).  Note that resolvers that
   prefer client NS records, which often have a lower TTL, may leak
-  data more frequently than what the root zone TTL specifies.
+  data more frequently than what the root zone TTL specifies.  Note
+  that NSEC aggressive caching requires at least understanding NSEC
+  records and ideally verifying them with DNSSEC.
   
-- DNS Query Name Minimisation to Improve Privacy {{RFC9156}}: The
-  original DNS protocol specifications {{RFC1035}} indicated that the
-  entire query name being handled by a resolver should be sent to
-  upstream authoritative servers, leaking all portions of the domain
-  name.  {{RFC9156}} minimizes this leakage by specifying that
-  resolvers should only query the authoritative source for the labels
-  needed (at the slight expensive of potentially increased traffic).
-  This greatly improves privacy in the case where the sensitive
-  information is in the labels before the TLD
-  (e.g. sensitive.example).  However, this cannot entirely minimize
-  the leakage of TLD names themselves, which may or may not be
-  sensitive in nature (.xxx is commonly used as a common example).
-  Note, however, that like the Aggressive NSEC technique above, the
-  queries leaked are typically cached for up to the TTL or other
-  length.
+- DNS Query Name Minimisation to Improve Privacy {{RFC9156}} (commonly
+  referred to as QName Minimization): The original DNS protocol
+  specifications {{RFC1035}} indicated that the entire query name
+  being handled by a resolver should be sent to upstream authoritative
+  servers, leaking all portions of the domain name.  {{RFC9156}}
+  minimizes this leakage by specifying that resolvers should only
+  query the authoritative source for the labels needed (at the slight
+  expensive of potentially increased traffic).  This greatly improves
+  privacy in the case where the sensitive information is in the labels
+  before the TLD (e.g. sensitive.example).  However, this cannot
+  entirely minimize the leakage of TLD names themselves, which may or
+  may not be sensitive in nature (.xxx is commonly used as a common
+  example).  Note, however, that like the Aggressive NSEC technique
+  above, the queries leaked are typically cached for up to the TTL or
+  other length.  Unlike NSEC Aggressive Caching, DNSSEC is not
+  required to implement QName Minimization.
 
 - LocalRoot {{RFC8806}}: because a LocalRoot implementation has all of
   the root zone data available to it, no queries to the root need to
   be sent at all.
 
 ## Latency
+
+Latency to the RSS is generally thought not to be of critical
+importance, as the majority of the resolvers should only rarely send
+queries to the root for legitimate TLDs.  Queries containing
+right-most labels that are not TLDs are subject to either Aggressive
+NSEC caching time limitations, when deployed, or negative answer
+caching as defined by the root zone's SOA field.
 
 ## Disconnected operations
 
