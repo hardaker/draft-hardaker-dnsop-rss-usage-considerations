@@ -151,6 +151,23 @@ right-most labels that are not TLDs are subject to either Aggressive
 NSEC caching time limitations, when deployed, or negative answer
 caching as defined by the root zone's SOA field.
 
+For negative answers, especially those from user inputs containing
+typos, there is the possibility that in especially remote destinations
+that the resolver a human is using is actually waiting for an answer
+from back from the RSS.  In fact, this is one motivation listed in
+{{RFC8806}} for implementing LocalRoot.
+
+Techniques that support reducing latency to the root, often by having
+the answers already available, include:
+
+- Aggressive Use of DNSSEC-Validated Cache {{RFC9077}} potentially
+  prevents needing to send queries for unknown negative answers, as
+  discussed above.
+  
+- LocalRoot {{RFC8806}}: As above, a LocalRoot implementation already
+  has the information in the root zone and thus can answer immediately
+  and without sending any queries to the RSS.
+
 ## Disconnected operations
 
 At times a region may become disconnected from the larger internet due
