@@ -137,6 +137,26 @@ resolver, various techniques are available for use that include:
   above, the queries leaked are typically cached for up to the TTL or
   other length.  Unlike NSEC Aggressive Caching, DNSSEC is not
   required to implement QName Minimization.
+  
+- Specification for DNS over Transport Layer Security (TLS)
+  {{RFC7858}} and DNS over Datagram Transport Layer Security (DTLS)
+  {{RFC8094}} (along with supplemental information {{RFC8310}}) are
+  designed to minimize the visibility of the traffic to the recursive
+  resolvers (collectively referred to as "DNS over (D)TLS").  
+  DNS Queries over HTTPS (DoH) {{RFC8484}} and Oblivious DNS over
+  HTTPS {{RFC9230}} enable DNS over HTTP transports that also protect
+  the queries in transit to recursive resolvers.  However, these
+  protocol definitions do not support DNS queries from the recursive
+  resolver to authoritative servers, such as the RSS.
+  
+  The Unilateral Opportunistic Deployment of Encrypted
+  Recursive-to-Authoritative DNS {{RFC9539}} specification does define
+  recursive to authoritative authenticated and encrypted TLS sessions
+  but is an EXPERIMENTAL status document at this time.  At the time of
+  this writing, only 2 of the 13 root server identifiers support DNS
+  over TLS transactions.  With DNS over (D)TLS in place, the query
+  name leakage to the intermediate networks is removed leaving only
+  queries to only leak to the RSS itself.
 
 - LocalRoot {{RFC8806}}: because a LocalRoot implementation has all of
   the root zone data available to it, no queries to the root need to
