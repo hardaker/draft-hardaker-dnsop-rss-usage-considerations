@@ -93,7 +93,7 @@ Note that this is separate from the centralization of the contents of
 the DNS RSS, which is needed for globally unique identifier system
 {{RFC2826}} and is also outside the scope of this document.
 
-# Centralized vs Decentralized RSS Characteristics
+# Centralized vs Decentralized RSS Characteristics {#analysis}
 
 ## Privacy
 
@@ -216,13 +216,44 @@ from the RSS:
   cache marking or similar, in which case the entire RSS data would
   remain viable a significantly longer period of time.
 
+## Bit Flipping
+
+TBD (root-servers.net)
+
+## Glue Protection
+
+Although DNSSEC protects the NS records within the root zone data, the
+A and AAAA glue records are not signed.  Thus they could be modified
+by machine-in-the-middle attacks, cache injection techniques, etc to
+either block traffic by changing the addresses to servers that don't
+respond, or to alternate addresses that do respond.  For addresses
+that do respond, they will unable to alter root or TLD related data
+without being detected by validating resolvers, however they could be
+used as a form of surveillance by continuing to proxy legitimate
+requests while recording the transactions.  Note that glue records
+from the root zone are typically cached for a lengthy period of time,
+depending on the parent and child TTLs, which is a benefit for
+resolvers that receive the correct records but a detriment for those
+that receive modified records.
+
+Solutions to this problem space include:
+
+- DNSSEC {{RFC9364}} prevents malicious modification of critical data,
+  thus preventing false insertion of data that is not signed.
+  However, it does not prevent glue record modification.
+
+- LocalRoot implementations {{RFC8806}} download and verify the entire
+  contents of the root zone, and thus eliminates this threat entirely. 
+
 # Operational Considerations
 
 TBD
 
 # Security Considerations
 
-TBD
+This document discusses a large number of security related cases in
+{{analysis}} and proposes mitigation strategies, their effectiveness,
+and associated trade-offs.
 
 # IANA Considerations
 
