@@ -216,11 +216,7 @@ from the RSS:
   cache marking or similar, in which case the entire RSS data would
   remain viable a significantly longer period of time.
 
-## Bit Flipping
-
-TBD (root-servers.net)
-
-## Glue Protection
+## Glue Protection {#glue}
 
 Although DNSSEC protects the NS records within the root zone data, the
 A and AAAA glue records are not signed.  Thus they could be modified
@@ -243,7 +239,43 @@ Solutions to this problem space include:
   However, it does not prevent glue record modification.
 
 - LocalRoot implementations {{RFC8806}} download and verify the entire
-  contents of the root zone, and thus eliminates this threat entirely. 
+  contents of the root zone, including glue records, and thus
+  eliminates this threat entirely.
+
+## Bit Flipping
+
+Bit flipping is defined as accidental modifications to bits most
+frequently in memory or during transmission where a single bit may
+flip from 0 to 1, or vice versa.  These occur with some level of
+randomness and though they are rare, they can be measured in network
+traffic arriving at very popular servers of all types.  The
+root-servers.net zone is, unsurprisingly, a very popular domain
+because it bootstaps all DNS resolutions on the Internet.  Researchers
+have shown that by registering alternate domain names with single or
+double bit flips in the domain name to DNS names allows these servers
+to receive some non-zero number of requests to them for the legitimate
+domain.  This could cause problems similar to as the above discussed
+glue record modifications ({{glue}}).
+
+Cyptographic techniques properly identify and reject data with
+modifications of any kind, including bit flipping techniques.  Note
+that in this section we only discuss bitflips that are received by the
+resolver, or for answers coming back to queries from the RSS as an
+authoritative server being queried.  Bitflips that occur in packets
+leaving the resolver toward the client submitting the original request
+are out of scope and not covered in this document as the resolver has
+no control over them.
+
+Solutions to this problem space include:
+
+- DNSSEC {{RFC9364}} prevents malicious modification of critical data,
+  thus preventing data bit flips of DNSSEC signed data.
+  However, it does not prevent glue record modification as glue
+  records, as discussed above, are not protected by DNSSEC.
+
+- LocalRoot implementations {{RFC8806}} download and verify the entire
+  contents of the root zone, including glue records, and thus
+  eliminates this threat entirely for incoming queries.
 
 # Operational Considerations
 
