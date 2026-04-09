@@ -28,39 +28,10 @@ author:
     fullname: Wes Hardaker
     organization: Google, Inc.
     email: ietf@hardakers.net
-  -
-    fullname: Warren Kumari
-    organization: Google, Inc.
-    email: warren@kumari.net
-  -
-    ins: J. Reid
-    name: Jim Reid
-    org: RTFM llp
-    street: St Andrews House
-    city: 382 Hillington Road, Glasgow Scotland
-    code: G51 4BL
-    country: UK
-    email: jim@rfc1035.com
-  -
-    ins: G. Huston
-    fullname: Geoff Huston
-    organization: APNIC
-    email: gih@apnic.net
-    street: 6 Cordelia St
-    city: South Brisbane
-    code: QLD 4101
-    country: Australia
 
 normative:
-  BCP237:
-  RFC4033:  # DNSSEC
-  RFC8976:  # ZONEMD
 
 informative:
-  RFC2826:  # unique root 
-  RFC5936:  # DNS Zone Transfer
-  RFC7766:  # DNS Transport over TCP
-  RFC9110:  # HTTP Semantics and Methods
 
   draft-hardaker-dnsop-dns-xfr-scheme:
     title: The DNS XFR URI Schemes
@@ -68,7 +39,7 @@ informative:
   draft-hardaker-dnsop-root-zone-publication-list-guidelines:
     title: Guidelines for IANA DNS Root Zone Publication List Providers
     target: https://datatracker.ietf.org/doc/draft-hardaker-dnsop-root-zone-publication-list-guidelines
-  draft-wkumari-dnsop-localroot-bcp:
+  LOCALROOT:
     title: Populating resolvers with the root zone
     target: https://datatracker.ietf.org/doc/draft-wkumari-dnsop-localroot-bcp/
   NOROOTS:
@@ -158,7 +129,7 @@ resolver, various techniques are available for use that include:
   name leakage to the intermediate networks is removed leaving only
   queries to only leak to the RSS itself.
 
-- LocalRoot {{RFC8806}}: because a LocalRoot implementation has all of
+- LocalRoot {{LOCALROOT}}: because a LocalRoot implementation has all of
   the root zone data available to it, no queries to the root need to
   be sent at all.
 
@@ -175,7 +146,7 @@ For negative answers, especially those from user inputs containing
 typos, there is the possibility that in especially remote destinations
 that the resolver a human is using is actually waiting for an answer
 from back from the RSS.  In fact, this is one motivation listed in
-{{RFC8806}} for implementing LocalRoot.
+{{LOCALROOT}} for implementing LocalRoot.
 
 Techniques that support reducing latency to the root, often by having
 the answers already available, include:
@@ -184,7 +155,7 @@ the answers already available, include:
   prevents needing to send queries for unknown negative answers, as
   discussed above.
   
-- LocalRoot {{RFC8806}}: As above, a LocalRoot implementation already
+- LocalRoot {{LOCALROOT}}: As above, a LocalRoot implementation already
   has the information in the root zone and thus can answer immediately
   and without sending any queries to the RSS.
 
@@ -207,7 +178,7 @@ from the RSS:
   other authoritative servers, however it requires that the needed
   data exists in the cache in the first place.
 
-- LocalRoot: {{RFC8806}} -- provides a local copy of the entire RSS to
+- LocalRoot: {{LOCALROOT}} -- provides a local copy of the entire RSS to
   be used.  Implementations that do this may have used a pre-caching
   technique, in which case it would likely be useful similarly to the
   Serve Stale results.  Other implementations may have the entire copy
@@ -238,7 +209,7 @@ Solutions to this problem space include:
   thus preventing false insertion of data that is not signed.
   However, it does not prevent glue record modification.
 
-- LocalRoot implementations {{RFC8806}} download and verify the entire
+- LocalRoot implementations {{LOCALROOT}} download and verify the entire
   contents of the root zone, including glue records, and thus
   eliminates this threat entirely.
 
@@ -273,7 +244,7 @@ Solutions to this problem space include:
   However, it does not prevent glue record modification as glue
   records, as discussed above, are not protected by DNSSEC.
 
-- LocalRoot implementations {{RFC8806}} download and verify the entire
+- LocalRoot implementations {{LOCALROOT}} download and verify the entire
   contents of the root zone, including glue records, and thus
   eliminates this threat entirely for incoming queries.
 
