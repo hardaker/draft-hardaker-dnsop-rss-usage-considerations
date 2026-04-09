@@ -64,6 +64,24 @@ Note that this is separate from the centralization of the contents of
 the DNS RSS, which is needed for globally unique identifier system
 {{RFC2826}} and is also outside the scope of this document.
 
+# Document Conventions
+
+This document discusses various technical considerations when
+resolvers communicate with the DNS Root Server System (RSS) and
+techniques available for resolvers to improve their communication
+efficiency and security with the RSS.  For concerns addressed below,
+the various solution techniques are categorized using the following
+labels:
+
+* minimal: medium the technique addresses the problem with only a
+  small amount of improvement.
+* medium: the technique addresses the problem with a medium amount of
+  improvement.
+* significant: the technique addresses the problem that significantly
+  reduces the problem space, even though it does not entirely
+  alleviate it.
+* entirely: the technique completely mitigates the problem.
+
 # Centralized vs Decentralized RSS Characteristics {#analysis}
 
 ## Privacy
