@@ -12,16 +12,13 @@ workgroup: "Domain Name System Operations"
 keyword:
  - DNS
  - DNSSEC
- - zone cut
- - delegation
- - referral
-updates: RFC8806
+ - root zone
 venue:
   group: "Domain Name System Operations"
   type: "Working Group"
   mail: "dnsop@ietf.org"
   arch: "https://mailarchive.ietf.org/arch/browse/dnsop/"
-  github: "https://github.com/hardaker/draft-hardaker-dnsop-root-zone-publication-points"
+  github: "https://github.com/hardaker/draft-hardaker-dnsop-rss-usage-considerations"
 
 author:
   -
@@ -45,6 +42,9 @@ informative:
   NOROOTS:
     title: On Eliminating Root Nameservers from the DNS
     target: https://www.icir.org/mallman/pubs/All19b/All19b.pdf
+  ROOTPRIVACY:
+    title: Analyzing and mitigating privacy with the DNS root service
+    target: http://www.isi.edu/~hardaker/papers/2018-02-ndss-analyzing-root-privacy.pdf
 
 --- abstract
 
@@ -82,6 +82,60 @@ labels:
   alleviate it.
 * entirely: the technique completely mitigates the problem.
 
+# Techniques Affecting Communication with the RSS {#techniques}
+
+The following subsections describe the techniques discussed in this
+document.  In particular, for each of the communication with the RSS
+subtopics in {{analysis}}, these techniques will be referred to and
+compared for their effectiveness in each scenario.
+
+## QName Minimization
+
+The DNS Query Name Minimisation to Improve Privacy {{RFC9156}}
+specification describes how recursive resolvers can minimize the
+privacy leakage by describing how the resolver "no longer always sends
+the full original QNAME and original QTYPE to the upstream name
+server."
+
+## Aggressive NSEC
+
+The Aggressive Use of DNSSEC-Validated Cache {{RFC8198}} {{RFC9077}}
+specification describes how validating recursive resolvers can reduce
+the queries sent to authoritative servers by allowing
+"DNSSEC-validating resolvers to generate negative answers within a
+range and positive answers from wildcards."
+
+## DNS over TLS / DTLS /DoH
+
+The specifications for DNS over Transport Layer Security (TLS)
+{{RFC7858}} and DNS over Datagram Transport Layer Security (DTLS)
+{{RFC8094}} (along with supplemental information {{RFC8310}}) are
+designed to minimize the visibility of the traffic from clients to the
+recursive resolvers (collectively referred to as "DNS over (D)TLS").
+Similarly, DNS Queries over HTTPS (DoH) {{RFC8484}} and Oblivious DNS
+over HTTPS {{RFC9230}} enable DNS over HTTP transports that also
+protect the queries in transit to recursive resolvers.
+
+The Unilateral Opportunistic Deployment of Encrypted
+Recursive-to-Authoritative DNS {{RFC9539}} specification defines how
+recursive resolvers can communicate with authoritative servers that
+support encrypted TLS sessions. At this time the specification is
+published under an EXPERIMENTAL status.
+
+## LocalRoot
+
+The various LocalRoot specifications and implementations provide
+recursive resolvers with the ability to keep and use a copy of the
+root zone locally rather than sending queries directly to the root
+zone.  The concepts have been documented in various IETF documents
+({{RFC7706}}, {{RFC8806}}, {{LOCALROOT}}), academic papers
+({{NOROOTS}}, {{ROOTPRIVACY}}) and implementations {{BINDMIRROR}},
+{{KNOTMODULE}}, {{UNBOUNDAUTHZONE}}, {{LOCALROOTISI}}.  The earliest
+specifications and implementations made exclusive use of AXFR for
+transferring root zone data but later specifications and
+implementations have also allowed for the use of transferring the root
+zone using the HTTP protocol.
+
 # Centralized vs Decentralized RSS Characteristics {#analysis}
 
 ## Privacy
@@ -97,13 +151,12 @@ double those of answerable queries.
 To mitigate issues with potentially sensitive queries leaving a
 resolver, various techniques are available for use that include:
 
-- Aggressive Use of DNSSEC-Validated Cache {{RFC9077}} (often referred
-  to as "Aggressive NSEC"): Once a single query between two valid TLDs
-  has been leaked, validating resolvers can make use of the returned
-  NSEC records to prevent future queries between the two bounding TLDs
-  from leaking.  This greatly reduces, but not entirely eliminates,
-  the leaked queries.  The rough worst case scenario is a leak of 1
-  query per TLD in the root zone in the course of one TTL (2 days) or
+- Aggressive NSEC: Once a single query between two valid TLDs has been
+  leaked, validating resolvers can make use of the returned NSEC
+  records to prevent future queries between the two bounding TLDs from
+  leaking.  This greatly reduces, but not entirely eliminates, the
+  leaked queries.  The rough worst case scenario is a leak of 1 query
+  per TLD in the root zone in the course of one TTL (2 days) or
   implementation limit (frequently 1 day).  Note that resolvers that
   prefer client NS records, which often have a lower TTL, may leak
   data more frequently than what the root zone TTL specifies.  Note
