@@ -91,6 +91,10 @@ compared for their effectiveness in each scenario.
 
 ## QName Minimization
 
+The original DNS protocol
+specifications {{RFC1035}} indicated that the entire query name
+being handled by a resolver should be sent to upstream authoritative
+servers, leaking all portions of the domain name.
 The DNS Query Name Minimisation to Improve Privacy {{RFC9156}}
 specification describes how recursive resolvers can minimize the
 privacy leakage by describing how the resolver "no longer always sends
@@ -169,52 +173,36 @@ resolver, various techniques are available for use that include:
   leaked, validating resolvers can make use of the returned NSEC
   records to prevent future queries between the two bounding TLDs from
   leaking.  This greatly reduces, but not entirely eliminates, the
-  leaked queries.  The rough worst case scenario is a leak of 1 query
-  per TLD in the root zone in the course of one TTL (2 days) or
-  implementation limit (frequently 1 day).  Note that resolvers that
-  prefer client NS records, which often have a lower TTL, may leak
-  data more frequently than what the root zone TTL specifies.  Note
-  that NSEC aggressive caching requires at least understanding NSEC
-  records and ideally verifying them with DNSSEC.
+  leaked queries.  The rough worst case scenario with a long lived
+  cache is a leak of 1 query per TLD in the root zone in the course of
+  one TTL (2 days, or other implementation upper limit which can
+  commonly be 1 day).  Note that resolvers which prefer client NS
+  records, which often have a lower TTL, may leak data more frequently
+  than what the root zone TTL specifies.  Note that NSEC aggressive
+  caching requires resolvers to at least understand NSEC records and
+  hopefully verify them with DNSSEC.
   
-- DNS Query Name Minimisation to Improve Privacy {{RFC9156}} (commonly
-  referred to as QName Minimization): The original DNS protocol
-  specifications {{RFC1035}} indicated that the entire query name
-  being handled by a resolver should be sent to upstream authoritative
-  servers, leaking all portions of the domain name.  {{RFC9156}}
-  minimizes this leakage by specifying that resolvers should only
-  query the authoritative source for the labels needed (at the slight
-  expensive of potentially increased traffic).  This greatly improves
-  privacy in the case where the sensitive information is in the labels
-  before the TLD (e.g. sensitive.example).  However, this cannot
-  entirely minimize the leakage of TLD names themselves, which may or
-  may not be sensitive in nature (.xxx is commonly used as a common
-  example).  Note, however, that like the Aggressive NSEC technique
-  above, the queries leaked are typically cached for up to the TTL or
-  other length.  Unlike NSEC Aggressive Caching, DNSSEC is not
-  required to implement QName Minimization.
-  
-- Specification for DNS over Transport Layer Security (TLS)
-  {{RFC7858}} and DNS over Datagram Transport Layer Security (DTLS)
-  {{RFC8094}} (along with supplemental information {{RFC8310}}) are
-  designed to minimize the visibility of the traffic to the recursive
-  resolvers (collectively referred to as "DNS over (D)TLS").  
-  DNS Queries over HTTPS (DoH) {{RFC8484}} and Oblivious DNS over
-  HTTPS {{RFC9230}} enable DNS over HTTP transports that also protect
-  the queries in transit to recursive resolvers.  However, these
-  protocol definitions do not support DNS queries from the recursive
-  resolver to authoritative servers, such as the RSS.
-  
-  The Unilateral Opportunistic Deployment of Encrypted
-  Recursive-to-Authoritative DNS {{RFC9539}} specification does define
-  recursive to authoritative authenticated and encrypted TLS sessions
-  but is an EXPERIMENTAL status document at this time.  At the time of
-  this writing, only 2 of the 13 root server identifiers support DNS
-  over TLS transactions.  With DNS over (D)TLS in place, the query
-  name leakage to the intermediate networks is removed leaving only
-  queries to only leak to the RSS itself.
+- QName Minimisation:
 
-- LocalRoot {{LOCALROOT}}: because a LocalRoot implementation has all of
+  QName Minimisation greatly improves privacy in the case where the
+  sensitive information is in the labels before the TLD
+  (e.g. sensitive.example).  However, this cannot entirely minimize
+  the leakage of TLD names themselves, which may or may not be
+  sensitive in nature (.xxx is commonly used as a common example).
+  Note that like the Aggressive NSEC technique above, the queries
+  leaked are typically cached for up to the TTL or other length.
+  Unlike NSEC Aggressive Caching though, DNSSEC is not required to
+  implement QName Minimization.
+  
+- DNS over TLS / DoT / DoH
+  
+  At the time of this writing, only 2 of the 13 root server
+  identifiers support DNS over TLS transactions.  With DNS over (D)TLS
+  in place at a resolver and at least some identifiers, the query name
+  leakage to the intermediate networks in a path is removed, leaving
+  only the Root Server Operators receiving queries to the root zone.
+
+- LocalRoot: because a LocalRoot implementation has all of
   the root zone data available to it, no queries to the root need to
   be sent at all.
 
