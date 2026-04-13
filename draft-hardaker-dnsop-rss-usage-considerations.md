@@ -3,7 +3,7 @@ title: "DNS Root Server System Usage Considerations"
 abbrev: "DNS RSS Usage Considerations"
 category: info
 
-docname: draft-hardaker-dnsop-rss-usage-considerations
+docname: draft-hardaker-dnsop-rss-usage-considerations-latest
 submissiontype: IETF
 consensus: true
 v: 3
@@ -30,6 +30,27 @@ normative:
 
 informative:
 
+  RFC1035:
+  RFC2826:
+  RFC7706:
+  RFC7858:
+  RFC8094:
+  RFC8198:
+  RFC8310:
+  RFC8484:
+  RFC8767:
+  RFC8806:
+  RFC9077:
+  RFC9156:
+  RFC9230:
+  RFC9364:
+  RFC9539:
+  KNOTMODULE:
+    title: know module to support LocalRoot
+    target: https://knot-resolver.readthedocs.io/en/latest/lib.html
+  BINDMIRROR:
+    title: bind instructions for mirroring the root zone
+    target: https://bind9.readthedocs.io/en/v9.18.41/reference.html
   draft-hardaker-dnsop-dns-xfr-scheme:
     title: The DNS XFR URI Schemes
     target: https://datatracker.ietf.org/doc/draft-hardaker-dnsop-dns-xfr-scheme/
@@ -39,6 +60,12 @@ informative:
   LOCALROOT:
     title: Populating resolvers with the root zone
     target: https://datatracker.ietf.org/doc/draft-wkumari-dnsop-localroot-bcp/
+  LOCALROOTISI:
+    title: The LocalRoot project to help operators use LocalRoot
+    target: https://localroot.isi.edu/
+  UNBOUNDAUTHZONE:
+    title: Unbound documentation for supporting LocalRoot
+    target: https://unbound.docs.nlnetlabs.nl/en/latest/manpages/unbound.conf.html
   NOROOTS:
     title: On Eliminating Root Nameservers from the DNS
     target: https://www.icir.org/mallman/pubs/All19b/All19b.pdf
@@ -150,7 +177,7 @@ Server System.
 
 Queries to the RSS consist of queries within Top Level Domains (TLDs)
 that do exist (e.g. .com, or .xxx) as well as queries that do not
-exist (e.g. sensitive.internal, or sensitive.con [sic]).  To date the
+exist (e.g. sensitive.internal, or sensitive.con (sic)).  To date the
 quantity of unanswerable queries is typically double those of
 answerable queries.
 
@@ -181,7 +208,7 @@ resolver, various techniques are available for use that include:
   than what the root zone TTL specifies.  Note that NSEC aggressive
   caching requires resolvers to at least understand NSEC records and
   hopefully verify them with DNSSEC.
-  
+
 - QName Minimisation:
 
   QName Minimisation greatly improves privacy in the case where the
@@ -193,9 +220,9 @@ resolver, various techniques are available for use that include:
   leaked are typically cached for up to the TTL or other length.
   Unlike NSEC Aggressive Caching though, DNSSEC is not required to
   implement QName Minimization.
-  
+
 - DNS over TLS / DoT / DoH
-  
+
   At the time of this writing, only 2 of the 13 root server
   identifiers support DNS over TLS transactions.  With DNS over (D)TLS
   in place at a resolver and at least some identifiers, the query name
@@ -227,7 +254,7 @@ the answers already available, include:
 - Aggressive Use of DNSSEC-Validated Cache {{RFC9077}} potentially
   prevents needing to send queries for unknown negative answers, as
   discussed above.
-  
+
 - LocalRoot {{LOCALROOT}}: As above, a LocalRoot implementation already
   has the information in the root zone and thus can answer immediately
   and without sending any queries to the RSS.
