@@ -344,7 +344,7 @@ non-glue records include:
   checking the DNSSEC records for validity themselves is still
   recommended.
 
-## Glue Protection {#glue}
+### Glue Protection {#glue}
 
 Although DNSSEC protects the NS records within the root zone data, the
 A and AAAA glue records are not signed.  Thus they could be modified
@@ -371,6 +371,15 @@ Solutions to this problem space include:
 - LocalRoot implementations {{LOCALROOT}} download and verify the entire
   contents of the root zone, including glue records, and thus
   eliminates this threat entirely.
+
+- DNS over TLS / DTLS / DoH: Complete
+
+  Like with non-glue records, because the channel is considered secure
+  to the root server instance (when its identity is properly
+  verified), then the data received over the channel can be considered
+  secured.  The glue records cannot, however, be checked after
+  reception for DNSSEC validity since no RRSIGs on the glue records
+  will be present.
 
 ## Bit Flipping
 
