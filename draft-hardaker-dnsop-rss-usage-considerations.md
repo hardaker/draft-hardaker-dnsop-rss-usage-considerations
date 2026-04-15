@@ -100,14 +100,15 @@ efficiency and security with the RSS.  For concerns addressed below,
 the various solution techniques are categorized using the following
 labels:
 
-* minimal: medium the technique addresses the problem with only a
+- minimal: medium the technique addresses the problem with only a
   small amount of improvement.
-* medium: the technique addresses the problem with a medium amount of
+- moderate: the technique addresses the problem with a medium amount of
   improvement.
-* significant: the technique addresses the problem that significantly
+- significant: the technique addresses the problem that significantly
   reduces the problem space, even though it does not entirely
   alleviate it.
-* entirely: the technique completely mitigates the problem.
+
+- complete: the technique completely mitigates the problem.
 
 # Techniques Affecting Communication with the RSS {#techniques}
 
@@ -153,6 +154,12 @@ recursive resolvers can communicate with authoritative servers that
 support encrypted TLS sessions. At this time the specification is
 published under an EXPERIMENTAL status.
 
+## Serve Stale
+
+  The "Serving Stale Data to Improve DNS Resiliency" {{RFC8767}}
+  specifications defines how a resolver can continue to use and serve
+  previously obtained records who's TTLs have otherwise expired.
+
 ## LocalRoot
 
 The various LocalRoot specifications and implementations provide
@@ -196,7 +203,9 @@ protecting techniques listed below were deployed.
 To mitigate issues with potentially sensitive queries leaving a
 resolver, various techniques are available for use that include:
 
-- Aggressive NSEC: Once a single query between two valid TLDs has been
+- Aggressive NSEC: Significant
+
+  Once a single query between two valid TLDs has been
   leaked, validating resolvers can make use of the returned NSEC
   records to prevent future queries between the two bounding TLDs from
   leaking.  This greatly reduces, but not entirely eliminates, the
@@ -209,7 +218,7 @@ resolver, various techniques are available for use that include:
   caching requires resolvers to at least understand NSEC records and
   hopefully verify them with DNSSEC.
 
-- QName Minimisation:
+- QName Minimisation: Significant
 
   QName Minimisation greatly improves privacy in the case where the
   sensitive information is in the labels before the TLD
@@ -221,7 +230,7 @@ resolver, various techniques are available for use that include:
   Unlike NSEC Aggressive Caching though, DNSSEC is not required to
   implement QName Minimization.
 
-- DNS over TLS / DoT / DoH
+- DNS over TLS / DoT / DoH: Moderate
 
   At the time of this writing, only 2 of the 13 root server
   identifiers support DNS over TLS transactions.  With DNS over (D)TLS
@@ -229,9 +238,10 @@ resolver, various techniques are available for use that include:
   leakage to the intermediate networks in a path is removed, leaving
   only the Root Server Operators receiving queries to the root zone.
 
-- LocalRoot: because a LocalRoot implementation has all of
-  the root zone data available to it, no queries to the root need to
-  be sent at all.
+- LocalRoot: Complete
+
+  Because a LocalRoot implementation has all of the root zone data
+  available to it, no queries to the root need to be sent at all.
 
 ## Latency
 
@@ -251,13 +261,16 @@ from back from the RSS.  In fact, this is one motivation listed in
 Techniques that support reducing latency to the root, often by having
 the answers already available, include:
 
-- Aggressive Use of DNSSEC-Validated Cache {{RFC9077}} potentially
-  prevents needing to send queries for unknown negative answers, as
-  discussed above.
+- Aggressive NSEC: Significant
 
-- LocalRoot {{LOCALROOT}}: As above, a LocalRoot implementation already
-  has the information in the root zone and thus can answer immediately
-  and without sending any queries to the RSS.
+  Aggressive NSEC potentially prevents needing to send queries for
+  unknown negative answers, as discussed above.
+
+- LocalRoot: Complete
+
+  As above, a LocalRoot implementation already has the information in
+  the root zone and thus can answer immediately and without sending
+  any queries to the RSS.
 
 ## Disconnected operations
 
@@ -272,20 +285,24 @@ disconnected state.
 Solutions available for continuing to operate even when disconnected
 from the RSS:
 
-- Serve Stale: {{RFC8767}} -- defines how a resolver can continue to
-  use and serve previously obtained records who's TTLs have otherwise
-  expired.  This solution benefits both data from the RSS and from
-  other authoritative servers, however it requires that the needed
-  data exists in the cache in the first place.
+- Serve Stale: Significant
 
-- LocalRoot: {{LOCALROOT}} -- provides a local copy of the entire RSS to
-  be used.  Implementations that do this may have used a pre-caching
-  technique, in which case it would likely be useful similarly to the
-  Serve Stale results.  Other implementations may have the entire copy
-  remain in active use, regardless of when it was obtained, such as
-  through the use of a parallel authoritative server or via a special
-  cache marking or similar, in which case the entire RSS data would
-  remain viable a significantly longer period of time.
+  Serve Stale benefits both data from the RSS and from other
+  authoritative servers, however it requires that the needed data
+  exists in the cache in the first place.  Because it is likely that a
+  resolver may have information about a TLD in its cache it could
+  significantly help in a disconnected state, although it will not
+  help in cases where cache state for a TLD has never been filled or
+  has been expunged.
+
+- LocalRoot: Significant or Complete
+
+  LocalRoot implementations that fill their cache with records from
+  the root zone should be similarly protected as Serve Stale, as cache
+  records may still be expunged when not recently used.
+  Implementations that always make root zone contents available
+  (e.g. via classic RFC8806 parallel infrastructure or special cache
+  markings) will be completely protected.
 
 ## Glue Protection {#glue}
 
