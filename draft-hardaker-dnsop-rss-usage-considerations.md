@@ -156,9 +156,15 @@ published under an EXPERIMENTAL status.
 
 ## Serve Stale
 
-  The "Serving Stale Data to Improve DNS Resiliency" {{RFC8767}}
-  specifications defines how a resolver can continue to use and serve
-  previously obtained records who's TTLs have otherwise expired.
+The "Serving Stale Data to Improve DNS Resiliency" {{RFC8767}}
+specifications defines how a resolver can continue to use and serve
+previously obtained records who's TTLs have otherwise expired.
+
+## DNSSEC
+
+DNSSEC {{RFC9364}} prevents malicious modification of responses from
+the root and other signed zones to ensure that validating resolvers or
+clients have the ability to determine its authenticity and timeliness.
 
 ## LocalRoot
 
@@ -304,6 +310,40 @@ from the RSS:
   (e.g. via classic RFC8806 parallel infrastructure or special cache
   markings) will be completely protected.
 
+## Record Protection {#records}
+
+DNSSEC RRSIG records protect all data in the root zone aside from the
+glue records associated with each NS record.
+
+### Non-Glue Records
+
+All of the root zone records, aside from the glue records, are
+protected by DNSSEC and thus cannot be modified without detection.  As
+such, solutions for ensuring tamper-resistant access to the root zone
+non-glue records include:
+
+- DNSSEC: Complete
+
+  (assuming validation is performed using a root zone DNSSEC trust
+  anchor)
+  
+- LocalRoot: Complete
+
+  Because the entire root zone is downloaded and checked with both the
+  DNSSEC and ZONEMD records, modification of all data is properly
+  protected.  Note that if ZONEMD records are not checked, then glue
+  records may not be properly protected.
+  
+- DNS over TLS / DTLS / DoH: Complete
+
+  If the resolver is able to connect to a root server instance that
+  offers TLS, DTLS, DoH, or DoQ support and properly verify that
+  they've connected to the right root server instance then any answers
+  they receive over that protected path can be considered properly
+  validated, even without checking the DNSSEC records.  Although
+  checking the DNSSEC records for validity themselves is still
+  recommended.
+
 ## Glue Protection {#glue}
 
 Although DNSSEC protects the NS records within the root zone data, the
@@ -312,17 +352,19 @@ by machine-in-the-middle attacks, cache injection techniques, etc to
 either block traffic by changing the addresses to servers that don't
 respond, or to alternate addresses that do respond.  For addresses
 that do respond, they will unable to alter root or TLD related data
-without being detected by validating resolvers, however they could be
-used as a form of surveillance by continuing to proxy legitimate
-requests while recording the transactions.  Note that glue records
-from the root zone are typically cached for a lengthy period of time,
-depending on the parent and child TTLs, which is a benefit for
-resolvers that receive the correct records but a detriment for those
-that receive modified records.
+without being detected by validating resolvers, however even while
+responding with properly signed records they could be used as a form
+of surveillance by continuing to proxy legitimate requests while
+recording the transactions.  Note that glue records from the root
+zone, like NS records, are typically cached for a lengthy period of
+time, which is a benefit for resolvers that receive the correct
+records but a detriment for those that receive modified records.
 
 Solutions to this problem space include:
 
-- DNSSEC {{RFC9364}} prevents malicious modification of critical data,
+- DNSSEC: Moderate
+
+  {{RFC9364}} prevents malicious modification of critical data,
   thus preventing false insertion of data that is not signed.
   However, it does not prevent glue record modification.
 
