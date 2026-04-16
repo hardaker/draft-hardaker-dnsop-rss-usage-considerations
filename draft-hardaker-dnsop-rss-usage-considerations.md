@@ -262,31 +262,37 @@ resolver, various techniques are available for use that include:
 ## Latency
 
 Latency to the RSS is generally thought not to be of critical
-importance, as the majority of the resolvers should only rarely send
-queries to the root for legitimate TLDs.  Queries containing
-right-most labels that are not TLDs are subject to either Aggressive
-NSEC caching time limitations, when deployed, or negative answer
-caching as defined by the root zone's SOA field.
-
-For negative answers, especially those from user inputs containing
-typos, there is the possibility that in especially remote destinations
-that the resolver a human is using is actually waiting for an answer
-from back from the RSS.  In fact, this is one motivation listed in
-{{LOCALROOT}} for implementing LocalRoot.
+importance with traffic sent to the RSS, as the majority of the
+resolvers should only rarely send queries to the root for legitimate
+TLDs.  However, because negative answers are more frequent and may be
+from end-user typos or similar that latency to the RSS matters at
+least a little as a user may be directly waiting for a response before
+realizing their error.  In fact, this is one motivation listed in
+{{RFC8806}} for implementing LocalRoot.
 
 Techniques that support reducing latency to the root, often by having
 the answers already available, include:
 
 - Aggressive NSEC: Significant
 
-  Aggressive NSEC potentially prevents needing to send queries for
-  unknown negative answers, as discussed above.
+  With Agressive NSEC deployed, queries containing right-most labels
+  (TLD labels) that are not in the root and are covered by an NSEC
+  record that is in the (validating) resolver's cache are not sent and
+  thus answerable immediately.  The result is similar to privacy
+  analysis showing that Aggressive NSEC provides significant latency
+  reduction to the root zone.
 
 - LocalRoot: Complete
 
   As above, a LocalRoot implementation already has the information in
   the root zone and thus can answer immediately and without sending
   any queries to the RSS.
+
+- Serve Stale: N/A
+
+  Note that though Serve Stale may have an answer in the cache that is
+  usable, it does not help with latency since the answer should not be
+  used until an attempt to query the RSS has already been made.
 
 ## Disconnected operations
 
