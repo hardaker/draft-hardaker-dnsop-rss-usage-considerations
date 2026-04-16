@@ -75,21 +75,23 @@ informative:
 
 --- abstract
 
-This document discusses the positive and negative aspects of the
-centralized nature of the DNS Root Server System infrastructure (RSS).  Note
-that this is separate from the centralization of the contents of the
-DNS RSS, which is needed for globally unique identifier system and is
-also outside the scope of this document.
+This document discusses the various technologies that have been
+developed to enhance communication with the DNS generally but in the
+specific view point of communicating with the the DNS Root Server
+System (RSS).
 
 --- middle
 
 # Introduction
 
-This document discusses the positive and negative aspects of the
-centralized nature of the DNS Root Server System infrastructure (RSS).
-Note that this is separate from the centralization of the contents of
-the DNS RSS, which is needed for globally unique identifier system
-{{RFC2826}} and is also outside the scope of this document.
+This document discusses the various technologies that have been
+developed to enhance communication with the DNS generally but in the
+specific view point of communicating with the the DNS Root Server
+System (RSS).
+
+Note that the need itself for a centralized source of a unique
+internet naming system is outside the scope of this document, but is
+well covered in {{RFC2826}}.
 
 # Document Conventions
 
