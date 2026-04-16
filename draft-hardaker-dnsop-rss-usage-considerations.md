@@ -78,7 +78,8 @@ informative:
 This document discusses the various technologies that have been
 developed to enhance communication with the DNS generally but in the
 specific view point of communicating with the the DNS Root Server
-System (RSS).
+System (RSS).  We consider each of the recently developed protocols
+and how they change and improve communication with the RSS.
 
 --- middle
 
@@ -87,30 +88,36 @@ System (RSS).
 This document discusses the various technologies that have been
 developed to enhance communication with the DNS generally but in the
 specific view point of communicating with the the DNS Root Server
-System (RSS).
+System (RSS).  We consider each of the recently developed protocols
+and how they change and improve communication with the RSS.
 
 Note that the need itself for a centralized source of a unique
 internet naming system is outside the scope of this document, but is
 well covered in {{RFC2826}}.
 
-# Document Conventions
+This document begins with a brief description and reference to the
+various communication enhancements in {{techniques}} and follow that
+with an analysis of how they might improve upon communication with the
+RSS in {{analysis}}.
 
-This document discusses various technical considerations when
-resolvers communicate with the DNS Root Server System (RSS) and
-techniques available for resolvers to improve their communication
-efficiency and security with the RSS.  For concerns addressed below,
-the various solution techniques are categorized using the following
-labels:
+## Document Conventions
 
-- minimal: medium the technique addresses the problem with only a
-  small amount of improvement.
-- moderate: the technique addresses the problem with a medium amount of
-  improvement.
-- significant: the technique addresses the problem that significantly
-  reduces the problem space, even though it does not entirely
-  alleviate it.
+For each of the potential changes to RSS communication in
+{{analysis}}, we categorize the various solution by how much they
+improve or mitigate the concerns using the following keywords:
 
-- complete: the technique completely mitigates the problem.
+- Minimal: the technique addresses the problem with only a
+  minimal amount of improvement.
+
+- Moderate: the technique addresses the problem with a moderate amount
+  of improvement.
+
+- Significant: the technique addresses the problem that offers
+  significant improvement for communicating with the RSS, even though
+  it does not entirely address the problem space.
+
+- Complete: the technique completely enhances communication with the
+  RSS or completely mitigates the defined concern.
 
 # Techniques Affecting Communication with the RSS {#techniques}
 
