@@ -253,6 +253,11 @@ resolver, various techniques are available for use that include:
 
   Because a LocalRoot implementation has all of the root zone data
   available to it, no queries to the root need to be sent at all.
+  Furthermore, because the data is received and verified before use
+  locally, and because no queries are sent, there is only two
+  remaining source of trust for the information used: IANA itself and
+  the RZM who are responsible for creating the root zone, although
+  even they have no visibility into how resolvers make use of the data.
 
 ## Latency
 
