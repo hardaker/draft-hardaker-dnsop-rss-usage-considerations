@@ -211,6 +211,12 @@ searches, misconfigured systems and software, or simply because it
 needed to be resolved and no privacy protecting techniques listed
 below were deployed.
 
+Note that beyond the analysis of a single record being observed that a
+larger or temporal analysis may reveal additional information and/or
+behavioral patterns ({{ROOTPRIVACY}}).  For example, the collection of
+unique CCTLDs observed being queried during the course of a 24 hour
+period may reveal the political bias in a resolver's clients.
+
 To mitigate issues with potentially sensitive queries leaving a
 resolver, various techniques are available for use that include:
 
