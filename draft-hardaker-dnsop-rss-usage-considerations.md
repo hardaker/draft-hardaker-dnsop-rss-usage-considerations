@@ -196,15 +196,20 @@ answerable queries.
 
 When an answer is not within a resolver's cache the query must be sent
 to the RSS.  The queries and responses to them are are delivered
-through networks in between the resolver and the RSS.  The privacy
-sensitivity of these can vary widely ranging from unlikely sensitive
-(such as a query for just ".com" without any left hand labels) or more
-critical queries that leak potentially personal or system sensitive
-information that was not intended to leak beyond an internal network
-boundary (such as TBD).  These accidental leaks can stem from typos,
-leaked web browser keyword searches, misconfigured systems and
-software, or simply because it needed to be resolved and no privacy
-protecting techniques listed below were deployed.
+through networks in between the resolver and the RSS.  Thus the
+resulting set of entities that may see the contents of a query include
+the up to 12 RSOs that serve the RSS and to which queries are sent and
+the networks in between the client resolver and the RSO.
+
+The privacy sensitivity of queries sent to the RSS can vary widely
+ranging from unlikely sensitive (such as a query for just ".com"
+without any left hand labels) or more critical queries that leak
+potentially personal or system sensitive information that was not
+intended to leak beyond an internal network boundary (such as TBD).
+These accidental leaks can stem from typos, leaked web browser keyword
+searches, misconfigured systems and software, or simply because it
+needed to be resolved and no privacy protecting techniques listed
+below were deployed.
 
 To mitigate issues with potentially sensitive queries leaving a
 resolver, various techniques are available for use that include:
