@@ -82,7 +82,7 @@ informative:
     title: ICANN DNS Magnitude statistics page
     target: https://magnitude.research.icann.org/
   DNSMAGNITUDE2020:
-    title:
+    title: DNS Magnitude - A Popularity Figure for Domain Names, and its Application to L-root Traffic
     target: https://www.icann.org/en/system/files/files/dns-magnitude-05aug20-en.pdf
 
 --- abstract
@@ -398,7 +398,7 @@ non-glue records include:
   trust anchor and followed all the way to the child zone.  Note that
   not all records in the root zone are protected, and thus this
   is considered Significant since most TLDs do offer DNSSEC support.
-  
+
   Note that because DNSSEC combined with NSEC records allows
   verification of negative answers received from the root.  The
   non-existent records are actually authoratative at the root.
@@ -409,7 +409,7 @@ non-glue records include:
   DNSSEC and ZONEMD records, modification of all data is properly
   protected.  Note this requires proper DNSSEC validation of at least
   the ZONEMD record.
-  
+
 - Encrypted DNS: Complete
 
   If the resolver is able to connect to a root server instance that
@@ -450,7 +450,7 @@ Solutions to this problem space include:
   validate the child side NS, A and AAAA records or only believes
   caches and uses the parent records.  Furthermore the TLD in use must
   be signed for this protection to be effective.
-  
+
 - LocalRoot implementations {{LOCALROOT}} download and verify the
   entire contents of the root zone, including NS and glue records, and
   thus eliminates this threat entirely.
@@ -500,7 +500,7 @@ Solutions to detecting and rejecting bitfliped data include:
   NS and glue record modification as glue records, as discussed above,
   are not protected by DNSSEC unless verified through to the client's
   copy of the records.
-  
+
   Research has shown that some validating resolvers fail to detect
   when some bit flipping situations have occurred, however.
 
