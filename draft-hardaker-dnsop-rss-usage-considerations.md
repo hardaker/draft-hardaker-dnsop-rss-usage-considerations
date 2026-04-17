@@ -334,26 +334,25 @@ the answers already available, include:
 
 ## Disconnected operations
 
-At times a region may become disconnected from the larger internet due
-to operational failures from many causes (network outages, intentional
-disruptions, natural catastrophes, etc).  In this situation, because the RSS
-serves as the pinnacle of the DNS, any resolver needing information
-about TLDs would be effectively unable to respond to related queries
-without implementation a solution that allows it to operate in a
-disconnected state.
+At times a region may become disconnected from the larger internet
+from a variety of causes (network outages, intentional disruptions,
+natural catastrophes, etc).  In this situation, because the RSS serves
+as the pinnacle of the DNS, any resolver needing information about
+TLDs not in their cache would be effectively unable to respond to that
+branch of the DNS tree.  Obviously a complete disconnection from the
+Intenet means all resolutions will fail, but at times local
+infrastructure may still be viable and reachable (for example, a ccTLD
+may be reachable even when the RSS is not).
 
-Solutions available for continuing to operate even when disconnected
-from the RSS:
+Solutions available for resolvers to continue operating even when
+disconnected from the RSS:
 
 - Serve Stale: Significant
 
-  Serve Stale benefits both data from the RSS and from other
-  authoritative servers, however it requires that the needed data
-  exists in the cache in the first place.  Because it is likely that a
-  resolver may have information about a TLD in its cache it could
-  significantly help in a disconnected state, although it will not
-  help in cases where cache state for a TLD has never been filled or
-  has been expunged.
+  As Serve Stale allows resolvers to re-use past data when
+  authoritative servers are unreachable, it significantly helps in
+  disconnected situations as long as the needed records are in the
+  cache.
 
 - LocalRoot: Significant or Complete
 
@@ -361,42 +360,61 @@ from the RSS:
   the root zone should be similarly protected as Serve Stale, as cache
   records may still be expunged when not recently used.
   Implementations that always make root zone contents available
-  (e.g. via classic RFC8806 parallel infrastructure or special cache
-  markings) will be completely protected.
+  (e.g. via classic RFC8806 parallel infrastructure or special
+  don't-expunge cache flags) will be completely protected from a
+  disconnection with the RSS.
 
 ## Record Protection {#records}
 
-DNSSEC RRSIG records protect all data in the root zone aside from the
-glue records associated with each NS record.
+DNSSEC RRSIG records protects resource records (RRs) in DNS zones.
+The only exception to this protection is when data records are
+intended to be helpful as they're authoritative in a child.  These
+unprotected records on the parent side include both NS records served
+by the parent and associated address records (glue records).  Once the
+parent has requested the same information from the child, and the DS
+record has been followed, then the child's information becomes
+authoritative and verified.  However, if the parent side's information
+is modified in any way, it may lead the resolver to the wrong
+infrastructure at least initially.  With DNSSEC validation happening
+this should result in a denial of service or temporary eves-dropping
+issue at most.
 
-### Non-Glue Records
+For analyzing how the techniques listed in this draft affect these
+communication patterns, we break the analysis into two parts of the
+RSS (parent) record sets: non-authoratative (non-glue) records and
+authoritative records.
 
-All of the root zone records, aside from the glue records, are
+### Authoritative RR Protection
+
+All of the root zone records, aside from the NS and glue records, are
 protected by DNSSEC and thus cannot be modified without detection.  As
 such, solutions for ensuring tamper-resistant access to the root zone
 non-glue records include:
 
-- DNSSEC: Complete
+- DNSSEC: Significant
 
-  (assuming validation is performed using a root zone DNSSEC trust
-  anchor)
+  DNSSEC protects against record modification for records served from
+  the RSS, assuming validation is performed using a root zone DNSSEC
+  trust anchor and followed all the way to the child zone.  Note that
+  not all records in the root zone are protected, and thus this
+  is considered Significant since most TLDs do offer DNSSEC support.
   
 - LocalRoot: Complete
 
   Because the entire root zone is downloaded and checked with both the
   DNSSEC and ZONEMD records, modification of all data is properly
-  protected.  Note that if ZONEMD records are not checked, then glue
-  records may not be properly protected.
+  protected.  Note this requires proper DNSSEC validation of at least
+  the ZONEMD record.
   
 - Encrypted DNS: Complete
 
   If the resolver is able to connect to a root server instance that
-  offers TLS, DTLS, DoH, or DoQ support and properly verify that
-  they've connected to the right root server instance then any answers
+  offers authenticated and encrypted DNS support, then any answers
   they receive over that protected path can be considered properly
-  validated, even without checking the DNSSEC records.  Although
-  checking the DNSSEC records for validity themselves is still
-  recommended.
+  validated, even without checking the corresponding DNSSEC records.
+  Although checking the DNSSEC records for validity themselves is
+  still recommended.  And this presumes that some trust mechanism is
+  used to bootstrap the authentication of the RSS instance used.
 
 ### Glue Protection {#glue}
 
@@ -483,17 +501,17 @@ In summary, the following table summarizes the analysis in
 {{analysis}} given the DNS communication technologies in
 {{techniques}} and how they affect communication with the RSS.
 
-|---------------------|--------|--------|----------|--------|----------|-----------|
-|                     | QName  | Aggr.  | Encrypt  | Serve  | DNSSEC   | LocalRoot |
-|                     | Min    | NSEC   | DNS      | Stale  |          |           |
-|---------------------|--------|--------|----------|--------|----------|-----------|
-| Privacy             | Signif | Signif | Moderate |        |          | Complete  |
-| Latency             |        | Signif |          |        |          | Complete  |
-| Disconnection       |        |        |          | Signif |          | Complete* |
-| Non-glue Protection |        |        | Complete |        | Complete | Complete  |
-| Glue Protection     |        |        | Complete |        |          | Complete  |
-| Bit Flipping        |        |        |          |        | Signif   | Complete  |
-|---------------------|--------|--------|----------|--------|----------|-----------|
+|--------------------|--------|--------|----------|--------|--------|-----------|
+|                    | QName  | Aggr.  | Encrypt  | Serve  | DNSSEC | LocalRoot |
+|                    | Min    | NSEC   | DNS      | Stale  |        |           |
+|--------------------|--------|--------|----------|--------|--------|-----------|
+| Privacy            | Signif | Signif | Moderate |        |        | Complete  |
+| Latency            |        | Signif |          |        |        | Complete  |
+| Disconnection      |        |        |          | Signif |        | Complete* |
+| Auth RR Protection |        |        | Complete |        | Signif | Complete  |
+| Glue Protection    |        |        | Complete |        |        | Complete  |
+| Bit Flipping       |        |        |          |        | Signif | Complete  |
+|--------------------|--------|--------|----------|--------|--------|-----------|
 
 (*): as discussed above, this depends on the implementation with some
 implementations only being Significant while others are Complete.
