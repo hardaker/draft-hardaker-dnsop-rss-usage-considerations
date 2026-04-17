@@ -396,7 +396,7 @@ records but a detriment for those that receive modified records.
 
 Solutions to this problem space include:
 
-- DNSSEC: Moderate
+- DNSSEC: None
 
   {{RFC9364}} prevents malicious modification of critical data,
   thus preventing false insertion of data that is not signed.
@@ -441,14 +441,40 @@ no control over them.
 
 Solutions to this problem space include:
 
-- DNSSEC {{RFC9364}} prevents malicious modification of critical data,
+- DNSSEC: Significant
+
+  Prevents malicious modification of critical data,
   thus preventing data bit flips of DNSSEC signed data.
   However, it does not prevent glue record modification as glue
   records, as discussed above, are not protected by DNSSEC.
+  
+  Research has shown that some validating resolvers fail to detect
+  when some bit flipping situations have occurred, however.
 
-- LocalRoot implementations {{LOCALROOT}} download and verify the entire
-  contents of the root zone, including glue records, and thus
-  eliminates this threat entirely for incoming queries.
+- LocalRoot: Complete
+
+  LocalRoot implementations download and verify the entire contents of
+  the root zone, including glue records, and thus eliminates this
+  threat entirely for incoming queries.
+
+# Summary
+
+In summary, the following table summarizes the analysis in
+{{analysis}} given the DNS communication technologies in
+{{techniques}} and how they affect communication with the RSS.
+
+|---------------------|--------------|-------------|-----------|-------------|-------------|----------------------|
+|                     | QName        | Aggressive  | Encrypted | Serve       | DNSSEC      | LocalRoot            |
+|                     | Minimization | NSEC        | DNS       | Stale       |             |                      |
+|---------------------|--------------|-------------|-----------|-------------|-------------|----------------------|
+| Privacy             | Significant  | Significant | Moderate  |             |             | Complete             |
+| Latency             |              | Significant |           |             |             | Complete             |
+| Disconnection       |              |             |           | Significant |             | Significant/Complete |
+| Non-glue Protection |              |             | Complete  |             | Complete    | Complete             |
+| Glue Protection     |              |             | Complete  |             |             | Complete             |
+| Bit Flipping        |              |             |           |             | Significant | Complete             |
+|---------------------|--------------|-------------|-----------|-------------|-------------|----------------------|
+
 
 # Operational Considerations
 
