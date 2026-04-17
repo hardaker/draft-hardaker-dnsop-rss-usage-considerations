@@ -119,24 +119,23 @@ improve or mitigate the concerns using the following keywords:
 - Complete: the technique completely enhances communication with the
   RSS or completely mitigates the defined concern.
 
-# Techniques Affecting Communication with the RSS {#techniques}
+# Techniques Improving Communication with the RSS {#techniques}
 
 The following subsections describe the techniques discussed in this
-document.  In particular, for each of the communication with the RSS
-subtopics in {{analysis}}, these techniques will be referred to and
-compared for their effectiveness in each scenario.
+document that improve communication with the RSS, in particular
+relating to security concerns.  Each of these will then be used to
+analyze the various situations they approve in {{analysis}}.
 
 ## QName Minimization
 
-The original DNS protocol
-specifications {{RFC1035}} indicated that the entire query name
-being handled by a resolver should be sent to upstream authoritative
-servers, leaking all portions of the domain name.
-The DNS Query Name Minimisation to Improve Privacy {{RFC9156}}
-specification describes how recursive resolvers can minimize the
-privacy leakage by describing how the resolver "no longer always sends
-the full original QNAME and original QTYPE to the upstream name
-server."
+The original DNS protocol specifications {{RFC1035}} indicated that
+the entire query name being handled by a resolver should be sent to
+upstream authoritative servers, leaking all labels in a domain name to
+all the authoritative servers used in the resolution process.  The DNS
+Query Name Minimisation to Improve Privacy {{RFC9156}} specification
+describes how recursive resolvers can minimize the privacy leakage by
+describing how the resolver "no longer always sends the full original
+QNAME and original QTYPE to the upstream name server."
 
 ## Aggressive NSEC
 
@@ -146,13 +145,15 @@ the queries sent to authoritative servers by allowing
 "DNSSEC-validating resolvers to generate negative answers within a
 range and positive answers from wildcards."
 
-## DNS over TLS / DTLS /DoH
+## Encrypted DNS
 
 The specifications for DNS over Transport Layer Security (TLS)
 {{RFC7858}} and DNS over Datagram Transport Layer Security (DTLS)
 {{RFC8094}} (along with supplemental information {{RFC8310}}) are
-designed to minimize the visibility of the traffic from clients to the
-recursive resolvers (collectively referred to as "DNS over (D)TLS").
+collectively referred to as "DNS over (D)TLS".  They are designed to
+minimize the visibility of the traffic from clients to the recursive
+resolvers.
+
 Similarly, DNS Queries over HTTPS (DoH) {{RFC8484}} and Oblivious DNS
 over HTTPS {{RFC9230}} enable DNS over HTTP transports that also
 protect the queries in transit to recursive resolvers.
@@ -160,7 +161,7 @@ protect the queries in transit to recursive resolvers.
 The Unilateral Opportunistic Deployment of Encrypted
 Recursive-to-Authoritative DNS {{RFC9539}} specification defines how
 recursive resolvers can communicate with authoritative servers that
-support encrypted TLS sessions. At this time the specification is
+support encrypted TLS sessions. At this time, the specification is
 published under an EXPERIMENTAL status.
 
 ## Serve Stale
@@ -173,21 +174,23 @@ previously obtained records who's TTLs have otherwise expired.
 
 DNSSEC {{RFC9364}} prevents malicious modification of responses from
 the root and other signed zones to ensure that validating resolvers or
-clients have the ability to determine its authenticity and timeliness.
+potentially their clients can determine the data's origin,
+authenticity and timeliness.
 
 ## LocalRoot
 
 The various LocalRoot specifications and implementations provide
 recursive resolvers with the ability to keep and use a copy of the
 root zone locally rather than sending queries directly to the root
-zone.  The concepts have been documented in various IETF documents
-({{RFC7706}}, {{RFC8806}}, {{LOCALROOT}}), academic papers
-({{NOROOTS}}, {{ROOTPRIVACY}}) and implementations {{BINDMIRROR}},
-{{KNOTMODULE}}, {{UNBOUNDAUTHZONE}}, {{LOCALROOTISI}}.  The earliest
-specifications and implementations made exclusive use of AXFR for
-transferring root zone data but later specifications and
-implementations have also allowed for the use of transferring the root
-zone using the HTTP protocol.
+zone.  The concept has been documented for over a decade in various
+IETF documents ({{RFC7706}}, {{RFC8806}}, {{LOCALROOT}}), academic
+papers ({{NOROOTS}}, {{ROOTPRIVACY}}) and implementations
+{{BINDMIRROR}}, {{KNOTMODULE}}, {{UNBOUNDAUTHZONE}}, {{LOCALROOTISI}}.
+
+The earliest LocalRoot specifications and implementations made
+exclusive use of AXFR for transferring root zone data.  However, later
+specifications and implementations have also allowed for the use of
+transferring the root zone using the HTTP protocol.
 
 # Centralized vs Decentralized RSS Characteristics {#analysis}
 
@@ -256,10 +259,10 @@ resolver, various techniques are available for use that include:
   Unlike NSEC Aggressive Caching though, DNSSEC is not required to
   implement QName Minimization.
 
-- DNS over TLS / DoT / DoH: Moderate
+- Encrypted DNS: Moderate
 
   At the time of this writing, only 2 of the 13 root server
-  identifiers support DNS over TLS transactions.  With DNS over (D)TLS
+  identifiers support DNS over TLS transactions.  With Encrypted DNS
   in place at a resolver and at least some identifiers, the query name
   leakage to the intermediate networks in a path is removed, leaving
   only the Root Server Operators receiving queries to the root zone.
@@ -365,7 +368,7 @@ non-glue records include:
   protected.  Note that if ZONEMD records are not checked, then glue
   records may not be properly protected.
   
-- DNS over TLS / DTLS / DoH: Complete
+- Encrypted DNS: Complete
 
   If the resolver is able to connect to a root server instance that
   offers TLS, DTLS, DoH, or DoQ support and properly verify that
@@ -403,7 +406,7 @@ Solutions to this problem space include:
   contents of the root zone, including glue records, and thus
   eliminates this threat entirely.
 
-- DNS over TLS / DTLS / DoH: Complete
+- Encrypted DNS: Complete
 
   Like with non-glue records, because the channel is considered secure
   to the root server instance (when its identity is properly
