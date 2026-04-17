@@ -467,36 +467,39 @@ Solutions to this problem space include:
 
 ## Bit Flipping
 
-Bit flipping is defined as accidental modifications to bits most
-frequently in memory or during transmission where a single bit may
-flip from 0 to 1, or vice versa.  These occur with some level of
-randomness and though they are rare, they can be measured in network
-traffic arriving at very popular servers of all types.  The
-root-servers.net zone is, unsurprisingly, a very popular domain
-because it bootstaps all DNS resolutions on the Internet.  Researchers
-have shown that by registering alternate domain names with single or
-double bit flips in the domain name to DNS names allows these servers
-to receive some non-zero number of requests to them for the legitimate
-domain.  This could cause problems similar to as the above discussed
-glue record modifications ({{glue}}).
+Bit flipping is defined as accidental modifications to bits due to
+memory corruption in one of the processing hosts or during
+transmission.  The net effect is that at least one bit may flip
+randomly from 0 to 1, or vice versa, although hopefully with low
+probability.  Though rare, they have been measured in the world in
+network traffic arriving at very popular servers of all types.
 
-Cyptographic techniques properly identify and reject data with
-modifications of any kind, including bit flipping techniques.  Note
-that in this section we only discuss bitflips that are received by the
-resolver, or for answers coming back to queries from the RSS as an
-authoritative server being queried.  Bitflips that occur in packets
+The root-servers.net zone is, unsurprisingly, a very popular domain:
+it bootstaps all Internet DNS resolutions.  Researchers have shown
+that by registering alternate domain names with single or double bit
+flips in the root-servers.net domain name allows these alternate
+servers to receive requests to them intended to be sent to the real
+root-servers.net domain.  These bit flips can cause problems similar
+to as the above discussed glue record modifications ({{glue}}).
+
+Cyptographic techniques like DNSSEC properly identify and reject data
+with modifications of any kind, including bit flipping techniques.
+Note that in this section we only discuss bitflips that are received
+by the resolver, or for answers coming back to queries from the RSS as
+an authoritative server being queried.  Bitflips that occur in packets
 leaving the resolver toward the client submitting the original request
 are out of scope and not covered in this document as the resolver has
 no control over them.
 
-Solutions to this problem space include:
+Solutions to detecting and rejecting bitfliped data include:
 
 - DNSSEC: Significant
 
-  Prevents malicious modification of critical data,
-  thus preventing data bit flips of DNSSEC signed data.
-  However, it does not prevent glue record modification as glue
-  records, as discussed above, are not protected by DNSSEC.
+  Prevents malicious modification of critical data, thus preventing
+  data bit flips of DNSSEC signed data.  However, it does not prevent
+  NS and glue record modification as glue records, as discussed above,
+  are not protected by DNSSEC unless verified through to the client's
+  copy of the records.
   
   Research has shown that some validating resolvers fail to detect
   when some bit flipping situations have occurred, however.
@@ -513,17 +516,17 @@ In summary, the following table summarizes the analysis in
 {{analysis}} given the DNS communication technologies in
 {{techniques}} and how they affect communication with the RSS.
 
-|--------------------|--------|--------|----------|--------|--------|-----------|
-|                    | QName  | Aggr.  | Encrypt  | Serve  | DNSSEC | LocalRoot |
-|                    | Min    | NSEC   | DNS      | Stale  |        |           |
-|--------------------|--------|--------|----------|--------|--------|-----------|
-| Privacy            | Signif | Signif | Moderate |        |        | Complete  |
-| Latency            |        | Signif |          |        |        | Complete  |
-| Disconnection      |        |        |          | Signif |        | Complete* |
-| Auth RR Protection |        |        | Complete |        | Signif | Complete  |
-| Glue Protection    |        |        | Complete |        |        | Complete  |
-| Bit Flipping       |        |        |          |        | Signif | Complete  |
-|--------------------|--------|--------|----------|--------|--------|-----------|
+|---------------|--------|--------|----------|--------|--------|-----------|
+|               | QName  | Aggr.  | Encrypt  | Serve  | DNSSEC | LocalRoot |
+|               | Min    | NSEC   | DNS      | Stale  |        |           |
+|---------------|--------|--------|----------|--------|--------|-----------|
+| Privacy       | Signif | Signif | Moderate |        |        | Complete  |
+| Latency       |        | Signif |          |        |        | Complete  |
+| Disconnection |        |        |          | Signif |        | Complete* |
+| Auth Prot     |        |        | Complete |        | Signif | Complete  |
+| Non-auth Prot |        |        | Complete |        | Signif | Complete  |
+| Bit Flipping  |        |        |          |        | Signif | Complete  |
+|---------------|--------|--------|----------|--------|--------|-----------|
 
 (*): as discussed above, this depends on the implementation with some
 implementations only being Significant while others are Complete.
