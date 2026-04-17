@@ -381,8 +381,8 @@ issue at most.
 
 For analyzing how the techniques listed in this draft affect these
 communication patterns, we break the analysis into two parts of the
-RSS (parent) record sets: non-authoratative (non-glue) records and
-authoritative records.
+RSS (parent) record sets: authoritative RR protection and
+non-authoratative (glue) records.
 
 ### Authoritative RR Protection
 
@@ -399,6 +399,10 @@ non-glue records include:
   not all records in the root zone are protected, and thus this
   is considered Significant since most TLDs do offer DNSSEC support.
   
+  Note that because DNSSEC combined with NSEC records allows
+  verification of negative answers received from the root.  The
+  non-existent records are actually authoratative at the root.
+
 - LocalRoot: Complete
 
   Because the entire root zone is downloaded and checked with both the
@@ -416,42 +420,50 @@ non-glue records include:
   still recommended.  And this presumes that some trust mechanism is
   used to bootstrap the authentication of the RSS instance used.
 
-### Glue Protection {#glue}
+### Non-authoratative Data (Glue) Protection {#glue}
 
-Although DNSSEC protects the NS records within the root zone data, the
-A and AAAA glue records are not signed.  Thus they could be modified
-by machine-in-the-middle attacks, cache injection techniques, etc to
-either block traffic by changing the addresses to servers that don't
-respond, or to alternate addresses that do respond.  For addresses
-that do respond, they will unable to alter root or TLD related data
-without being detected by validating resolvers, however even while
-responding with properly signed records they could be used as a form
-of surveillance by continuing to proxy legitimate requests while
-recording the transactions.  Note that glue records from the root
-zone, like NS records, are typically cached for a lengthy period of
-time, which is a benefit for resolvers that receive the correct
-records but a detriment for those that receive modified records.
+Although DNSSEC protects many of the records within the root zone, the
+TLD's NS, A and AAAA records are not signed.  Thus they could be
+modified by machine-in-the-middle attacks, cache injection techniques,
+etc to either block traffic by changing the addresses to servers that
+don't respond to create a denial of service issue.
+
+Alternatively, they can be modified to point to alternate addresses
+that actually do respond.  These addresses will be unable to alter
+records that have been properly verified with DNSSEC, however even
+while responding with properly signed records they could be used as a
+form of surveillance by continuing to proxy legitimate requests while
+recording the transactions.  Note that NS and glue records from the
+root zone are typically cached for a lengthy period of time, which is
+a benefit for resolvers that receive the correct records but a
+detriment for those that receive modified records and have a
+parent-side preference.
 
 Solutions to this problem space include:
 
-- DNSSEC: None
+- DNSSEC: None to Significant
 
   DNSSEC prevents malicious modification of critical data, thus
   preventing false insertion of data that is not signed.  However, it
-  does not prevent glue record modification.
-
-- LocalRoot implementations {{LOCALROOT}} download and verify the entire
-  contents of the root zone, including glue records, and thus
-  eliminates this threat entirely.
+  does not prevent NS and glue record modification.  The protection
+  offered by DNSSEC depends on whether the resolver uses DNSSEC to
+  validate the child side NS, A and AAAA records or only believes
+  caches and uses the parent records.  Furthermore the TLD in use must
+  be signed for this protection to be effective.
+  
+- LocalRoot implementations {{LOCALROOT}} download and verify the
+  entire contents of the root zone, including NS and glue records, and
+  thus eliminates this threat entirely.
 
 - Encrypted DNS: Complete
 
   Like with non-glue records, because the channel is considered secure
   to the root server instance (when its identity is properly
   verified), then the data received over the channel can be considered
-  secured.  The glue records cannot, however, be checked after
-  reception for DNSSEC validity since no RRSIGs on the glue records
-  will be present.
+  authentic (and encrypted).  The NS and glue records cannot, however,
+  be checked after reception for DNSSEC validity since no RRSIGs on
+  the glue records will be present and thus the child must be
+  consulted as well.
 
 ## Bit Flipping
 
