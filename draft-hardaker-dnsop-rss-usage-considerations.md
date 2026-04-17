@@ -72,6 +72,18 @@ informative:
   ROOTPRIVACY:
     title: Analyzing and mitigating privacy with the DNS root service
     target: http://www.isi.edu/~hardaker/papers/2018-02-ndss-analyzing-root-privacy.pdf
+  QUERYCOMPOSITION:
+    title: Understanding DNS Query Composition at B-Root
+    target: https://arxiv.org/pdf/2308.07966
+  DITL:
+    title: A Day In The Life of the Internet
+    target: https://www.dns-oarc.net/oarc/data/ditl
+  DNSMAGNITUDE:
+    title: ICANN DNS Magnitude statistics page
+    target: https://magnitude.research.icann.org/
+  DNSMAGNITUDE2020:
+    title:
+    target: https://www.icann.org/en/system/files/files/dns-magnitude-05aug20-en.pdf
 
 --- abstract
 
@@ -202,70 +214,78 @@ Server System.
 
 Queries to the RSS consist of queries within Top Level Domains (TLDs)
 that do exist (e.g. .com, or .xxx) as well as queries that do not
-exist (e.g. sensitive.internal, or sensitive.con (sic)).  To date the
-quantity of unanswerable queries is typically double those of
-answerable queries.
+exist (e.g. sensitive.internal, or sensitive.con (sic)).
 
 When an answer is not within a resolver's cache the query must be sent
 to the RSS.  The queries and responses to them are are delivered
-through networks in between the resolver and the RSS.  Thus the
-resulting set of entities that may see the contents of a query include
-the up to 12 RSOs that serve the RSS and to which queries are sent and
-the networks in between the client resolver and the RSO.
+through networks in between the DNS client and the RSS.  Thus the
+maximum set of of entities that may observe the contents of a query
+(and thus must be trusted) include the 12 RSOs that serve the 26 RSS
+identifiers (13 IPv4 and 13 IPv6) and the networks in between the DNS
+client and the RSS.  Note that not all DNS clients make use of all 26
+root server identifiers.
+
+Multiple studies (for example, {{QUERYCOMPOSITION}},
+{{DNSMAGNITUDE2020}}) or datasets (for example, {{DITL}},
+{{DNSMAGNITUDE}}) have revealed the breakdown of the types of traffic
+received at the RSS.  These show the wide breadth of queries sent to
+the RSS broken down by percentages.
 
 The privacy sensitivity of queries sent to the RSS can vary widely
-ranging from unlikely sensitive (such as a query for just ".com"
+ranging from unlikely sensitive (such as a query for just ".example"
 without any left hand labels) or more critical queries that leak
 potentially personal or system sensitive information that was not
-intended to leak beyond an internal network boundary (such as TBD).
-These accidental leaks can stem from typos, leaked web browser keyword
-searches, misconfigured systems and software, or simply because it
-needed to be resolved and no privacy protecting techniques listed
-below were deployed.
+intended to leak beyond an internal network boundary (such as
+".wpad").  These accidental leaks can stem from typos, web browser
+keyword searches, misconfigured software, or simply because it needed
+to be resolved and no privacy protecting techniques listed below were
+deployed.
 
-Note that beyond the analysis of a single record being observed that a
-larger or temporal analysis may reveal additional information and/or
-behavioral patterns ({{ROOTPRIVACY}}).  For example, the collection of
-unique CCTLDs observed being queried during the course of a 24 hour
-period may reveal the political bias in a resolver's clients.
+Note that beyond the analysis of a single record being observed, a
+larger or temporal analysis of all of a client's queries may reveal
+additional information and/or behavioral patterns ({{ROOTPRIVACY}}).
+For example, the collection of unique ccTLDs observed during the
+course of a 24 hour period may reveal the political bias in a
+resolver's clients.
 
 To mitigate issues with potentially sensitive queries leaving a
 resolver, various techniques are available for use that include:
 
 - Aggressive NSEC: Significant
 
-  Once a single query between two valid TLDs has been
-  leaked, validating resolvers can make use of the returned NSEC
-  records to prevent future queries between the two bounding TLDs from
-  leaking.  This greatly reduces, but not entirely eliminates, the
-  leaked queries.  The rough worst case scenario with a long lived
-  cache is a leak of 1 query per TLD in the root zone in the course of
-  one TTL (2 days, or other implementation upper limit which can
-  commonly be 1 day).  Note that resolvers which prefer client NS
-  records, which often have a lower TTL, may leak data more frequently
-  than what the root zone TTL specifies.  Note that NSEC aggressive
-  caching requires resolvers to at least understand NSEC records and
-  hopefully verify them with DNSSEC.
+  Once a single query between two valid TLDs has been sent, validating
+  resolvers can make use of the returned NSEC records to prevent
+  future queries between the two bounding TLDs from needing
+  resolution.  This significantly reduces, but not entirely
+  eliminates, the sending of queries to the RSS.  The rough worst case
+  scenario with a long lived cache is a transmission of 1 query per
+  TLD in the root zone in the course of one TTL (2 days, or other
+  implementation upper limit which can commonly be 1 day).  Note that
+  resolvers that prefer client NS records, which often have a lower
+  TTL, may send data more frequently than what the root zone's TTL
+  specifies.  Note that DNSSEC (or at least an understanding of the
+  NSEC record) is required to implement Agressive NSEC.
 
 - QName Minimisation: Significant
 
-  QName Minimisation greatly improves privacy in the case where the
+  QName Minimisation greatly improves privacy in the case where any
   sensitive information is in the labels before the TLD
   (e.g. sensitive.example).  However, this cannot entirely minimize
   the leakage of TLD names themselves, which may or may not be
-  sensitive in nature (.xxx is commonly used as a common example).
-  Note that like the Aggressive NSEC technique above, the queries
-  leaked are typically cached for up to the TTL or other length.
-  Unlike NSEC Aggressive Caching though, DNSSEC is not required to
-  implement QName Minimization.
+  sensitive in nature (".xxx" is used as a common example of a TLD
+  that may be considered sensitive).  Note that like the Aggressive
+  NSEC technique above, the sent queries are typically cached for a
+  period of time.  Unlike NSEC Aggressive Caching though, DNSSEC is
+  not required to implement QName Minimization.
 
 - Encrypted DNS: Moderate
 
   At the time of this writing, only 2 of the 13 root server
   identifiers support DNS over TLS transactions.  With Encrypted DNS
-  in place at a resolver and at least some identifiers, the query name
-  leakage to the intermediate networks in a path is removed, leaving
-  only the Root Server Operators receiving queries to the root zone.
+  deployed at a resolver and used when communicating with RSS
+  instances that support it, the query names sent to the intermediate
+  networks in a path are obfuscated, leaving only the Root Server
+  Operators receiving the queries to the root zone.
 
 - LocalRoot: Complete
 
@@ -398,9 +418,9 @@ Solutions to this problem space include:
 
 - DNSSEC: None
 
-  {{RFC9364}} prevents malicious modification of critical data,
-  thus preventing false insertion of data that is not signed.
-  However, it does not prevent glue record modification.
+  DNSSEC prevents malicious modification of critical data, thus
+  preventing false insertion of data that is not signed.  However, it
+  does not prevent glue record modification.
 
 - LocalRoot implementations {{LOCALROOT}} download and verify the entire
   contents of the root zone, including glue records, and thus
@@ -463,18 +483,20 @@ In summary, the following table summarizes the analysis in
 {{analysis}} given the DNS communication technologies in
 {{techniques}} and how they affect communication with the RSS.
 
-|---------------------|--------------|-------------|-----------|-------------|-------------|----------------------|
-|                     | QName        | Aggressive  | Encrypted | Serve       | DNSSEC      | LocalRoot            |
-|                     | Minimization | NSEC        | DNS       | Stale       |             |                      |
-|---------------------|--------------|-------------|-----------|-------------|-------------|----------------------|
-| Privacy             | Significant  | Significant | Moderate  |             |             | Complete             |
-| Latency             |              | Significant |           |             |             | Complete             |
-| Disconnection       |              |             |           | Significant |             | Significant/Complete |
-| Non-glue Protection |              |             | Complete  |             | Complete    | Complete             |
-| Glue Protection     |              |             | Complete  |             |             | Complete             |
-| Bit Flipping        |              |             |           |             | Significant | Complete             |
-|---------------------|--------------|-------------|-----------|-------------|-------------|----------------------|
+|---------------------|--------|--------|----------|--------|----------|-----------|
+|                     | QName  | Aggr.  | Encrypt  | Serve  | DNSSEC   | LocalRoot |
+|                     | Min    | NSEC   | DNS      | Stale  |          |           |
+|---------------------|--------|--------|----------|--------|----------|-----------|
+| Privacy             | Signif | Signif | Moderate |        |          | Complete  |
+| Latency             |        | Signif |          |        |          | Complete  |
+| Disconnection       |        |        |          | Signif |          | Complete* |
+| Non-glue Protection |        |        | Complete |        | Complete | Complete  |
+| Glue Protection     |        |        | Complete |        |          | Complete  |
+| Bit Flipping        |        |        |          |        | Signif   | Complete  |
+|---------------------|--------|--------|----------|--------|----------|-----------|
 
+(*): as discussed above, this depends on the implementation with some
+implementations only being Significant while others are Complete.
 
 # Operational Considerations
 
