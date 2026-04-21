@@ -87,9 +87,9 @@ informative:
 
 --- abstract
 
-This document discusses the various technologies that have been
-developed to enhance communication with the DNS generally but in the
-specific view point of communicating with the the DNS Root Server
+This document discusses various technologies that have been
+developed to enhance communication with the DNS generally, but in the
+specific viewpoint of communicating with the DNS Root Server
 System (RSS).  We consider each of the recently developed protocols
 and how they change and improve communication with the RSS.
 
@@ -98,8 +98,8 @@ and how they change and improve communication with the RSS.
 # Introduction
 
 This document discusses the various technologies that have been
-developed to enhance communication with the DNS generally but in the
-specific view point of communicating with the the DNS Root Server
+developed to enhance communication with the DNS generally, but in the
+specific viewpoint of communicating with the DNS Root Server
 System (RSS).  We consider each of the recently developed protocols
 and how they change and improve communication with the RSS.
 
@@ -115,7 +115,7 @@ RSS in {{analysis}}.
 ## Document Conventions
 
 For each of the potential changes to RSS communication in
-{{analysis}}, we categorize the various solution by how much they
+{{analysis}}, we categorize the various solutions by how much they
 improve or mitigate the concerns using the following keywords:
 
 - Minimal: the technique addresses the problem with only a
@@ -129,20 +129,20 @@ improve or mitigate the concerns using the following keywords:
   it does not entirely address the problem space.
 
 - Complete: the technique completely enhances communication with the
-  RSS or completely mitigates the defined concern.
+  RSS, or completely mitigates the defined concern.
 
 # Techniques Improving Communication with the RSS {#techniques}
 
 The following subsections describe the techniques discussed in this
 document that improve communication with the RSS, in particular
 relating to security concerns.  Each of these will then be used to
-analyze the various situations they approve in {{analysis}}.
+analyze the various situations they improve in {{analysis}}.
 
 ## QName Minimization
 
 The original DNS protocol specifications {{RFC1035}} indicated that
 the entire query name being handled by a resolver should be sent to
-upstream authoritative servers, leaking all labels in a domain name to
+upstream authoritative servers; this leaks all labels in a domain name to
 all the authoritative servers used in the resolution process.  The DNS
 Query Name Minimisation to Improve Privacy {{RFC9156}} specification
 describes how recursive resolvers can minimize the privacy leakage by
@@ -153,7 +153,7 @@ QNAME and original QTYPE to the upstream name server."
 
 The Aggressive Use of DNSSEC-Validated Cache {{RFC8198}} {{RFC9077}}
 specification describes how validating recursive resolvers can reduce
-the queries sent to authoritative servers by allowing
+the number of queries sent to authoritative servers by allowing
 "DNSSEC-validating resolvers to generate negative answers within a
 range and positive answers from wildcards."
 
@@ -179,8 +179,8 @@ published under an EXPERIMENTAL status.
 ## Serve Stale
 
 The "Serving Stale Data to Improve DNS Resiliency" {{RFC8767}}
-specifications defines how a resolver can continue to use and serve
-previously obtained records who's TTLs have otherwise expired.
+specification defines how a resolver can continue to use and serve
+previously obtained records whose TTLs have otherwise expired.
 
 ## DNSSEC
 
@@ -213,14 +213,14 @@ Server System.
 ## Privacy
 
 Queries to the RSS consist of queries within Top Level Domains (TLDs)
-that do exist (e.g. .com, or .xxx) as well as queries that do not
-exist (e.g. sensitive.internal, or sensitive.con (sic)).
+that do exist (e.g., .com, or .xxx) as well as queries that do not
+exist (e.g., sensitive.internal, or sensitive.con (sic)).
 
-When an answer is not within a resolver's cache the query must be sent
-to the RSS.  The queries and responses to them are are delivered
-through networks in between the DNS client and the RSS.  Thus the
-maximum set of of entities that may observe the contents of a query
-(and thus must be trusted) include the 12 RSOs that serve the 26 RSS
+When an answer is not within a resolver's cache, the query must be sent
+to the RSS.  The queries and responses to them are delivered
+through networks between the DNS client and the RSS.  Thus the
+maximum set of entities that may observe the contents of a query
+(and thus must be trusted) includes the 12 RSOs that serve the 26 RSS
 identifiers (13 IPv4 and 13 IPv6) and the networks in between the DNS
 client and the RSS.  Note that not all DNS clients make use of all 26
 root server identifiers.
@@ -233,12 +233,12 @@ the RSS broken down by percentages.
 
 The privacy sensitivity of queries sent to the RSS can vary widely
 ranging from unlikely sensitive (such as a query for just ".example"
-without any left hand labels) or more critical queries that leak
-potentially personal or system sensitive information that was not
+without any left-hand labels) or more critical queries that leak
+potentially personal or system-sensitive information that was not
 intended to leak beyond an internal network boundary (such as
 ".wpad").  These accidental leaks can stem from typos, web browser
 keyword searches, misconfigured software, or simply because it needed
-to be resolved and no privacy protecting techniques listed below were
+to be resolved, and no privacy-protecting techniques listed below were
 deployed.
 
 Note that beyond the analysis of a single record being observed, a
