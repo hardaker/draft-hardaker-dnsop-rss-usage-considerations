@@ -6,7 +6,6 @@
 MD_FILE := draft-hardaker-dnsop-rss-usage-considerations.md
 XML_FILE := $(MD_FILE:.md=.xml)
 TXT_FILE := $(MD_FILE:.md=.txt)
-MAKEFILE := Makefile
 
 # Default target
 all: $(TXT_FILE)

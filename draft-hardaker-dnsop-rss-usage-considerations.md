@@ -123,7 +123,10 @@ document categorizes the solutions using the following keywords:
 
 # Techniques Improving Communication with the RSS {#techniques}
 
-This section outlines various techniques designed to improve communication with the DNS Root Server System (RSS), particularly in addressing security concerns. These techniques are further analyzed in {{analysis}} to evaluate their effectiveness in different scenarios.
+This section outlines various techniques designed to improve communication with
+the DNS Root Server System (RSS), particularly in addressing security concerns.
+These techniques are further analyzed in {{analysis}} to evaluate their
+effectiveness in different scenarios.
 
 ## QName Minimization
 
@@ -144,12 +147,6 @@ number of queries sent to authoritative servers by allowing "DNSSEC-validating
 resolvers to generate negative answers within a range and positive answers from
 wildcards."
 
-The Aggressive Use of DNSSEC-Validated Cache {{RFC8198}} {{RFC9077}} enables
-validating resolvers to generate negative responses using cached NSEC records.
-This reduces the number of queries sent to authoritative servers by allowing
-"DNSSEC-validating resolvers to generate negative answers within a range and
-positive answers from wildcards."
-
 This technique is particularly effective in reducing queries to the RSS for
 non-existent TLDs, as once a single query between two valid TLDs has been sent,
 validating resolvers can make use of the returned NSEC records to prevent
@@ -160,11 +157,12 @@ queries are sent and more responses can be generated from the cache.
 
 ## Encrypted DNS
 
-There are a variety of protocols that enable encrypted DNS transactions between
-recursive resolvers and authoritative servers. These include DNS over Transport
-Layer Security (TLS) {{RFC7858}} and DNS over Datagram Transport Layer Security
-(DTLS) {{RFC8094}} (along with supplemental information {{RFC8310}}) which
-collectively are referred to as "DNS over (D)TLS".
+There are a variety of protocols that enable encrypted DNS transactions both
+between stubs and recursive resolvers, and recursive resolvers and
+authoritative servers. These include DNS over Transport Layer Security (TLS)
+{{RFC7858}} and DNS over Datagram Transport Layer Security (DTLS) {{RFC8094}}
+(along with supplemental information {{RFC8310}}) which collectively are
+referred to as "DNS over (D)TLS".
 
 In addition, DNS Queries over HTTPS (DoH) {{RFC8484}}, DNS over Dedicated QUIC
 Connections {{RFC9250}}, and Oblivious DNS over HTTPS {{RFC9230}} enable DNS
