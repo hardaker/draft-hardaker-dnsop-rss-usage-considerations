@@ -29,7 +29,6 @@ author:
 normative:
 
 informative:
-
   RFC1035:
   RFC2826:
   RFC7706:
@@ -51,12 +50,6 @@ informative:
   BINDMIRROR:
     title: bind instructions for mirroring the root zone
     target: https://bind9.readthedocs.io/en/v9.18.41/reference.html
-  draft-hardaker-dnsop-dns-xfr-scheme:
-    title: The DNS XFR URI Schemes
-    target: https://datatracker.ietf.org/doc/draft-hardaker-dnsop-dns-xfr-scheme/
-  draft-hardaker-dnsop-root-zone-publication-list-guidelines:
-    title: Guidelines for IANA DNS Root Zone Publication List Providers
-    target: https://datatracker.ietf.org/doc/draft-hardaker-dnsop-root-zone-publication-list-guidelines
   LOCALROOT:
     title: Populating resolvers with the root zone
     target: https://datatracker.ietf.org/doc/draft-wkumari-dnsop-localroot-bcp/
@@ -87,49 +80,45 @@ informative:
 
 --- abstract
 
-This document discusses various technologies that have been
-developed to enhance communication with the DNS generally, but in the
-specific viewpoint of communicating with the DNS Root Server
-System (RSS).  We consider each of the recently developed protocols
-and how they change and improve communication with the RSS.
+This document explores various technologies developed to enhance the DNS,
+focusing specifically on interactions with the DNS Root Server System (RSS). It
+examines recently developed protocols and evaluates their impact on
+communication with the RSS.
+
+The document begins by briefly describing and referencing various communication
+enhancements in {{techniques}}. It then provides an analysis of how these
+enhancements impact communication with the RSS in {{analysis}}.
 
 --- middle
 
 # Introduction
+This document explores various technologies developed to enhance the DNS,
+focusing specifically on interactions with the DNS Root Server System (RSS). It
+examines recently developed protocols and evaluates their impact on
+communication with the RSS.
 
-This document discusses the various technologies that have been
-developed to enhance communication with the DNS generally, but in the
-specific viewpoint of communicating with the DNS Root Server
-System (RSS).  We consider each of the recently developed protocols
-and how they change and improve communication with the RSS.
+While the necessity of a centralized source for a unique internet naming system
+is beyond the scope of this document, it is thoroughly addressed in
+{{RFC2826}}.
 
-Note that the need itself for a centralized source of a unique
-internet naming system is outside the scope of this document, but is
-well covered in {{RFC2826}}.
-
-This document begins with a brief description and reference to the
-various communication enhancements in {{techniques}} and follow that
-with an analysis of how they might improve upon communication with the
-RSS in {{analysis}}.
+The document begins by briefly describing and referencing various communication
+enhancements in {{techniques}}. It then provides an analysis of how these
+enhancements impact communication with the RSS in {{analysis}}.
 
 ## Document Conventions
 
-For each of the potential changes to RSS communication in
-{{analysis}}, we categorize the various solutions by how much they
-improve or mitigate the concerns using the following keywords:
+To evaluate the potential changes to RSS communication in {{analysis}}, this
+document categorizes the solutions using the following keywords:
 
-- Minimal: the technique addresses the problem with only a
-  minimal amount of improvement.
-
-- Moderate: the technique addresses the problem with a moderate amount
+- **Minimal**: The technique addresses the problem with only a minimal amount
   of improvement.
-
-- Significant: the technique addresses the problem that offers
-  significant improvement for communicating with the RSS, even though
-  it does not entirely address the problem space.
-
-- Complete: the technique completely enhances communication with the
-  RSS, or completely mitigates the defined concern.
+- **Moderate**: The technique provides a moderate level of improvement in
+  addressing the problem.
+- **Significant**: The technique offers substantial improvement for
+  communicating with the RSS, even though it does not entirely address the
+  problem space.
+- **Complete**: The technique fully enhances communication with the RSS or
+  completely mitigates the defined concern.
 
 # Techniques Improving Communication with the RSS {#techniques}
 
