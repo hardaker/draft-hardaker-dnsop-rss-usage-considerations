@@ -42,6 +42,7 @@ informative:
   RFC9077:
   RFC9156:
   RFC9230:
+  RFC9250:
   RFC9364:
   RFC9539:
   KNOTMODULE:
@@ -122,16 +123,13 @@ document categorizes the solutions using the following keywords:
 
 # Techniques Improving Communication with the RSS {#techniques}
 
-The following subsections describe the techniques discussed in this
-document that improve communication with the RSS, in particular
-relating to security concerns.  Each of these will then be used to
-analyze the various situations they improve in {{analysis}}.
+This section outlines various techniques designed to improve communication with the DNS Root Server System (RSS), particularly in addressing security concerns. These techniques are further analyzed in {{analysis}} to evaluate their effectiveness in different scenarios.
 
 ## QName Minimization
 
 The original DNS protocol specifications {{RFC1035}} indicated that
 the entire query name being handled by a resolver should be sent to
-upstream authoritative servers; this leaks all labels in a domain name to
+upstream authoritative servers; this leaks all labels in a query to
 all the authoritative servers used in the resolution process.  The DNS
 Query Name Minimisation to Improve Privacy {{RFC9156}} specification
 describes how recursive resolvers can minimize the privacy leakage by
@@ -141,29 +139,45 @@ QNAME and original QTYPE to the upstream name server."
 ## Aggressive NSEC
 
 The Aggressive Use of DNSSEC-Validated Cache {{RFC8198}} {{RFC9077}}
-specification describes how validating recursive resolvers can reduce
-the number of queries sent to authoritative servers by allowing
-"DNSSEC-validating resolvers to generate negative answers within a
-range and positive answers from wildcards."
+specification describes how validating recursive resolvers can reduce the
+number of queries sent to authoritative servers by allowing "DNSSEC-validating
+resolvers to generate negative answers within a range and positive answers from
+wildcards."
+
+The Aggressive Use of DNSSEC-Validated Cache {{RFC8198}} {{RFC9077}} enables
+validating resolvers to generate negative responses using cached NSEC records.
+This reduces the number of queries sent to authoritative servers by allowing
+"DNSSEC-validating resolvers to generate negative answers within a range and
+positive answers from wildcards."
+
+This technique is particularly effective in reducing queries to the RSS for
+non-existent TLDs, as once a single query between two valid TLDs has been sent,
+validating resolvers can make use of the returned NSEC records to prevent
+future queries between the two bounding TLDs from needing resolution. This
+improves both privacy and latency when communicating with the RSS, as fewer
+queries are sent and more responses can be generated from the cache.
+
 
 ## Encrypted DNS
 
-The specifications for DNS over Transport Layer Security (TLS)
-{{RFC7858}} and DNS over Datagram Transport Layer Security (DTLS)
-{{RFC8094}} (along with supplemental information {{RFC8310}}) are
-collectively referred to as "DNS over (D)TLS".  They are designed to
-minimize the visibility of the traffic from clients to the recursive
-resolvers.
+There are a variety of protocols that enable encrypted DNS transactions between
+recursive resolvers and authoritative servers. These include DNS over Transport
+Layer Security (TLS) {{RFC7858}} and DNS over Datagram Transport Layer Security
+(DTLS) {{RFC8094}} (along with supplemental information {{RFC8310}}) which
+collectively are referred to as "DNS over (D)TLS".
 
-Similarly, DNS Queries over HTTPS (DoH) {{RFC8484}} and Oblivious DNS
-over HTTPS {{RFC9230}} enable DNS over HTTP transports that also
-protect the queries in transit to recursive resolvers.
+In addition, DNS Queries over HTTPS (DoH) {{RFC8484}}, DNS over Dedicated QUIC
+Connections {{RFC9250}}, and Oblivious DNS over HTTPS {{RFC9230}} enable DNS
+over encrypted HTTP transports.
 
-The Unilateral Opportunistic Deployment of Encrypted
-Recursive-to-Authoritative DNS {{RFC9539}} specification defines how
-recursive resolvers can communicate with authoritative servers that
-support encrypted TLS sessions. At this time, the specification is
-published under an EXPERIMENTAL status.
+By encrypting the communication, these protocols prevent intermediate entities
+from observing the contents of DNS queries, thus improving privacy for users.
+
+The Unilateral Opportunistic Deployment of Encrypted Recursive-to-Authoritative
+DNS {{RFC9539}} specification defines how recursive resolvers can communicate
+with authoritative servers that support encrypted TLS sessions. At this time,
+the specification is published under an EXPERIMENTAL status.
+
 
 ## Serve Stale
 
