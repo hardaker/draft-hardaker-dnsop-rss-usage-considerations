@@ -25,6 +25,10 @@ author:
     fullname: Wes Hardaker
     organization: Google, Inc.
     email: ietf@hardakers.net
+  -
+    fullname: Warren Kumari
+    organization: Google
+    email: warren@kumari.net
 
 normative:
 
@@ -42,6 +46,7 @@ informative:
   RFC9077:
   RFC9156:
   RFC9230:
+  RFC9250:
   RFC9364:
   RFC9539:
   KNOTMODULE:
@@ -122,16 +127,16 @@ document categorizes the solutions using the following keywords:
 
 # Techniques Improving Communication with the RSS {#techniques}
 
-The following subsections describe the techniques discussed in this
-document that improve communication with the RSS, in particular
-relating to security concerns.  Each of these will then be used to
-analyze the various situations they improve in {{analysis}}.
+This section outlines various techniques designed to improve communication with
+the DNS Root Server System (RSS), particularly in addressing security concerns.
+These techniques are further analyzed in {{analysis}} to evaluate their
+effectiveness in different scenarios.
 
 ## QName Minimization
 
 The original DNS protocol specifications {{RFC1035}} indicated that
 the entire query name being handled by a resolver should be sent to
-upstream authoritative servers; this leaks all labels in a domain name to
+upstream authoritative servers; this leaks all labels in a query to
 all the authoritative servers used in the resolution process.  The DNS
 Query Name Minimisation to Improve Privacy {{RFC9156}} specification
 describes how recursive resolvers can minimize the privacy leakage by
@@ -141,84 +146,87 @@ QNAME and original QTYPE to the upstream name server."
 ## Aggressive NSEC
 
 The Aggressive Use of DNSSEC-Validated Cache {{RFC8198}} {{RFC9077}}
-specification describes how validating recursive resolvers can reduce
-the number of queries sent to authoritative servers by allowing
-"DNSSEC-validating resolvers to generate negative answers within a
-range and positive answers from wildcards."
+specification describes how validating recursive resolvers can reduce the
+number of queries sent to authoritative servers by allowing "DNSSEC-validating
+resolvers to generate negative answers within a range and positive answers from
+wildcards."
+
+This technique is particularly effective in reducing queries to the RSS for
+non-existent TLDs, as once a single query between two valid TLDs has been sent,
+validating resolvers can make use of the returned NSEC records to prevent
+future queries between the two bounding TLDs from needing resolution. This
+improves both privacy and latency when communicating with the RSS, as fewer
+queries are sent and more responses can be generated from the cache.
+
 
 ## Encrypted DNS
 
-The specifications for DNS over Transport Layer Security (TLS)
-{{RFC7858}} and DNS over Datagram Transport Layer Security (DTLS)
-{{RFC8094}} (along with supplemental information {{RFC8310}}) are
-collectively referred to as "DNS over (D)TLS".  They are designed to
-minimize the visibility of the traffic from clients to the recursive
-resolvers.
+There are a variety of protocols that enable encrypted DNS transactions both
+between stubs and recursive resolvers, and recursive resolvers and
+authoritative servers. These include DNS over Transport Layer Security (TLS)
+{{RFC7858}} and DNS over Datagram Transport Layer Security (DTLS) {{RFC8094}}
+(along with supplemental information {{RFC8310}}) which collectively are
+referred to as "DNS over (D)TLS".
 
-Similarly, DNS Queries over HTTPS (DoH) {{RFC8484}} and Oblivious DNS
-over HTTPS {{RFC9230}} enable DNS over HTTP transports that also
-protect the queries in transit to recursive resolvers.
+In addition, DNS Queries over HTTPS (DoH) {{RFC8484}}, DNS over Dedicated QUIC
+Connections {{RFC9250}}, and Oblivious DNS over HTTPS {{RFC9230}} enable DNS
+over encrypted HTTP transports.
 
-The Unilateral Opportunistic Deployment of Encrypted
-Recursive-to-Authoritative DNS {{RFC9539}} specification defines how
-recursive resolvers can communicate with authoritative servers that
-support encrypted TLS sessions. At this time, the specification is
-published under an EXPERIMENTAL status.
+By encrypting the communication, these protocols prevent intermediate entities
+from observing the contents of DNS queries, thus improving privacy for users.
+
+The Unilateral Opportunistic Deployment of Encrypted Recursive-to-Authoritative
+DNS {{RFC9539}} specification defines how recursive resolvers can communicate
+with authoritative servers that support encrypted TLS sessions. At this time,
+the specification is published under an EXPERIMENTAL status.
+
 
 ## Serve Stale
 
-The "Serving Stale Data to Improve DNS Resiliency" {{RFC8767}}
-specification defines how a resolver can continue to use and serve
-previously obtained records whose TTLs have otherwise expired.
+The "Serving Stale Data to Improve DNS Resiliency" {{RFC8767}} specification
+specifies how resolvers can continue to serve previously cached records even
+after their Time-To-Live (TTL) has expired. This approach enhances DNS
+resiliency by ensuring that responses remain available during periods when
+authoritative servers are unreachable, such as during network outages or server
+failures.
 
 ## DNSSEC
 
-DNSSEC {{RFC9364}} prevents malicious modification of responses from
-the root and other signed zones to ensure that validating resolvers or
-potentially their clients can determine the data's origin,
-authenticity and timeliness.
+DNSSEC {{RFC9364}} provides cryptographic assurance of the authenticity and
+integrity of DNS responses. Using digital signatures, DNSSEC ensures that data
+from the root and other signed zones cannot be maliciously modified without
+detection. This allows validating resolvers, and their clients, to verify the
+origin, authenticity, and correctness of DNS data.
 
 ## LocalRoot
 
-The various LocalRoot specifications and implementations provide
-recursive resolvers with the ability to keep and use a copy of the
-root zone locally rather than sending queries directly to the root
-zone.  The concept has been documented for over a decade in various
-IETF documents ({{RFC7706}}, {{RFC8806}}, {{LOCALROOT}}), academic
-papers ({{NOROOTS}}, {{ROOTPRIVACY}}) and implementations
-{{BINDMIRROR}}, {{KNOTMODULE}}, {{UNBOUNDAUTHZONE}}, {{LOCALROOTISI}}.
+LocalRoot enables recursive resolvers to maintain and use a local copy of the
+root zone, eliminating the need to query the root servers directly. This
+concept has been documented for over a decade in {{RFC7706}}, {{RFC8806}}, and
+{{LOCALROOT}}, and in academic research {{NOROOTS}}, {{ROOTPRIVACY}}. It is
+implemented in {{BINDMIRROR}}, {{KNOTMODULE}}, {{UNBOUNDAUTHZONE}},
+{{LOCALROOTISI}}.
 
-The earliest LocalRoot specifications and implementations made
-exclusive use of AXFR for transferring root zone data.  However, later
-specifications and implementations have also allowed for the use of
-transferring the root zone using the HTTP protocol.
+The initial LocalRoot implementations relied on AXFR for transferring root zone
+data. More recent implementations instead support HTTP-based transfers,
+providing additional flexibility and scalability. By using LocalRoot, resolvers
+can improve privacy, reduce dependency on external servers, and ensure
+consistent access to root zone data.
 
 # Centralized vs Decentralized RSS Characteristics {#analysis}
 
-The subsections below discuss the effects of the techniques listed in
-{{techniques}} when recursive resolvers communicate with the Root
-Server System.
+This section evaluates the impact of the techniques described in {{techniques}}
+on recursive resolvers' communication with the Root Server System (RSS).
 
 ## Privacy
 
-Queries to the RSS consist of queries within Top Level Domains (TLDs)
-that do exist (e.g., .com, or .xxx) as well as queries that do not
-exist (e.g., sensitive.internal, or sensitive.con (sic)).
+Queries sent to the RSS include those for existing Top-Level Domains (TLDs)
+(e.g., .com, .org) and queries for non-existent domains (e.g.,
+sensitive.internal, or sensitive.con (sic)).
 
-When an answer is not within a resolver's cache, the query must be sent
-to the RSS.  The queries and responses to them are delivered
-through networks between the DNS client and the RSS.  Thus the
-maximum set of entities that may observe the contents of a query
-(and thus must be trusted) includes the 12 RSOs that serve the 26 RSS
-identifiers (13 IPv4 and 13 IPv6) and the networks in between the DNS
-client and the RSS.  Note that not all DNS clients make use of all 26
-root server identifiers.
-
-Multiple studies (for example, {{QUERYCOMPOSITION}},
-{{DNSMAGNITUDE2020}}) or datasets (for example, {{DITL}},
-{{DNSMAGNITUDE}}) have revealed the breakdown of the types of traffic
-received at the RSS.  These show the wide breadth of queries sent to
-the RSS broken down by percentages.
+When a resolver's cache lacks an answer, the query is forwarded to the RSS. This
+exposes the query to the 12 Root Server Operators (RSOs) managing the 26 RSS
+identifiers (13 IPv4 and 13 IPv6) and the networks in between.
 
 The privacy sensitivity of queries sent to the RSS can vary widely
 ranging from unlikely sensitive (such as a query for just ".example"
@@ -237,25 +245,30 @@ For example, the collection of unique ccTLDs observed during the
 course of a 24 hour period may reveal the political bias in a
 resolver's clients.
 
-To mitigate issues with potentially sensitive queries leaving a
-resolver, various techniques are available for use that include:
+To mitigate issues with potentially sensitive queries leaving a resolver,
+various techniques are available for use that include:
 
-- Aggressive NSEC: Significant
+- **Aggressive NSEC: Significant**
 
-  Once a single query between two valid TLDs has been sent, validating
-  resolvers can make use of the returned NSEC records to prevent
-  future queries between the two bounding TLDs from needing
-  resolution.  This significantly reduces, but not entirely
-  eliminates, the sending of queries to the RSS.  The rough worst case
-  scenario with a long lived cache is a transmission of 1 query per
-  TLD in the root zone in the course of one TTL (2 days, or other
-  implementation upper limit which can commonly be 1 day).  Note that
-  resolvers that prefer client NS records, which often have a lower
-  TTL, may send data more frequently than what the root zone's TTL
-  specifies.  Note that DNSSEC (or at least an understanding of the
-  NSEC record) is required to implement Agressive NSEC.
+  [ Ed note: The NSEC example is as of this writing, and may change over time]
+  Aggressive NSEC leverages NSEC records to prevent redundant queries for
+  non-existent TLDs. Validating resolvers can use NSEC records to synthesize
+  negative responses for non-existent TLDs based on previously received NSEC
+  records. For example, if a query for a non-existent TLD (e.g.,
+  ".example")will return an NSEC record cryptographically proving that the no
+  names between .events and exchange exist. Subsequent queries within the NSEC
+  TTL for a non-existent TLD that falls between .events and .exchange (e.g.,
+  ".evil") can be answered immediately without sending a query to the RSS.
 
-- QName Minimisation: Significant
+  The rough worst case scenario with a long lived cache is a transmission of 1
+  query per TLD in the root zone in the course of one TTL (2 days, or other
+  implementation upper limit which can commonly be 1 day).  Note that resolvers
+  that prefer client NS records, which often have a lower TTL, may send data
+  more frequently than what the root zone's TTL specifies.  Note that DNSSEC
+  (or at least an understanding of the NSEC record) is required to implement
+  Aggressive NSEC.
+
+- **QName Minimization: Significant**
 
   QName Minimisation greatly improves privacy in the case where any
   sensitive information is in the labels before the TLD
@@ -267,32 +280,31 @@ resolver, various techniques are available for use that include:
   period of time.  Unlike NSEC Aggressive Caching though, DNSSEC is
   not required to implement QName Minimization.
 
-- Encrypted DNS: Moderate
+- **Encrypted DNS: Moderate**
 
-  At the time of this writing, only 2 of the 13 root server
-  identifiers support DNS over TLS transactions.  With Encrypted DNS
-  deployed at a resolver and used when communicating with RSS
-  instances that support it, the query names sent to the intermediate
-  networks in a path are obfuscated, leaving only the Root Server
-  Operators receiving the queries to the root zone.
+  Encrypted DNS protocols, such as DNS over TLS, protect queries from
+  intermediate observers by encrypting the communication. However, as of this
+  writing, only two of the 13 root server identifiers support encrypted DNS,
+  limiting its effectiveness.
 
-- LocalRoot: Complete
+- **LocalRoot: Complete**
 
-  Because a LocalRoot implementation has all of the root zone data
-  available to it, no queries to the root need to be sent at all.
-  Furthermore, because the data is received and verified before use
-  locally, and because no queries are sent, there is only two
-  remaining source of trust for the information used: IANA itself and
-  the RZM who are responsible for creating the root zone, although
-  even they have no visibility into how resolvers make use of the data.
+  LocalRoot implementations maintain a local copy of the root zone, thereby
+  completely eliminating the need to send queries to the RSS. This ensures
+  complete privacy, as no queries leave the resolver.
+
+  Furthermore, because the data is received and verified before being used,
+  locally, there are only two remaining sources of trust for the information
+  used: IANA itself and the RZM who are responsible for creating the root zone,
+  although even they have no visibility into how resolvers make use of the
+  data.
 
 ## Latency
 
-Latency to the RSS is generally thought not to be of critical
-importance with traffic sent to the RSS, as the majority of the
-resolvers should only rarely send queries to the root for legitimate
-TLDs.  However, because negative answers are more frequent and may be
-from end-user typos or similar that latency to the RSS matters at
+Even though almost all answers to user queries are served from the cache, many
+resolver operators are concerned about the latency of queries sent to the RSS.
+In addition, because negative answers are frequent and may be
+from end-user typos or similar, latency to the RSS does matters at
 least a little as a user may be directly waiting for a response before
 realizing their error.  In fact, this is one motivation listed in
 {{RFC8806}} for implementing LocalRoot.
@@ -300,7 +312,7 @@ realizing their error.  In fact, this is one motivation listed in
 Techniques that support reducing latency to the root, often by having
 the answers already available, include:
 
-- Aggressive NSEC: Significant
+- **Aggressive NSEC: Significant**
 
   With Agressive NSEC deployed, queries containing right-most labels
   (TLD labels) that are not in the root and are covered by an NSEC
@@ -309,13 +321,13 @@ the answers already available, include:
   analysis showing that Aggressive NSEC provides significant latency
   reduction to the root zone.
 
-- LocalRoot: Complete
+- **LocalRoot: Complete**
 
   As above, a LocalRoot implementation already has the information in
   the root zone and thus can answer immediately and without sending
   any queries to the RSS.
 
-- Serve Stale: N/A
+- **Serve Stale: N/A**
 
   Note that though Serve Stale may have an answer in the cache that is
   usable, it does not help with latency since the answer should not be
@@ -336,14 +348,14 @@ may be reachable even when the RSS is not).
 Solutions available for resolvers to continue operating even when
 disconnected from the RSS:
 
-- Serve Stale: Significant
+- **Serve Stale: Significant**
 
   As Serve Stale allows resolvers to re-use past data when
   authoritative servers are unreachable, it significantly helps in
   disconnected situations as long as the needed records are in the
   cache.
 
-- LocalRoot: Significant or Complete
+- **LocalRoot: Significant or Complete**
 
   LocalRoot implementations that fill their cache with records from
   the root zone should be similarly protected as Serve Stale, as cache
@@ -380,7 +392,7 @@ protected by DNSSEC and thus cannot be modified without detection.  As
 such, solutions for ensuring tamper-resistant access to the root zone
 non-glue records include:
 
-- DNSSEC: Significant
+- **DNSSEC: Significant**
 
   DNSSEC protects against record modification for records served from
   the RSS, assuming validation is performed using a root zone DNSSEC
@@ -392,14 +404,14 @@ non-glue records include:
   verification of negative answers received from the root.  The
   non-existent records are actually authoratative at the root.
 
-- LocalRoot: Complete
+- **LocalRoot: Complete**
 
   Because the entire root zone is downloaded and checked with both the
   DNSSEC and ZONEMD records, modification of all data is properly
   protected.  Note this requires proper DNSSEC validation of at least
   the ZONEMD record.
 
-- Encrypted DNS: Complete
+- **Encrypted DNS: Complete**
 
   If the resolver is able to connect to a root server instance that
   offers authenticated and encrypted DNS support, then any answers
@@ -430,7 +442,7 @@ parent-side preference.
 
 Solutions to this problem space include:
 
-- DNSSEC: None to Significant
+- **DNSSEC: None to Significant**
 
   DNSSEC prevents malicious modification of critical data, thus
   preventing false insertion of data that is not signed.  However, it
@@ -444,7 +456,7 @@ Solutions to this problem space include:
   entire contents of the root zone, including NS and glue records, and
   thus eliminates this threat entirely.
 
-- Encrypted DNS: Complete
+- **Encrypted DNS: Complete**
 
   Like with non-glue records, because the channel is considered secure
   to the root server instance (when its identity is properly
@@ -482,7 +494,7 @@ no control over them.
 
 Solutions to detecting and rejecting bitfliped data include:
 
-- DNSSEC: Significant
+- **DNSSEC: Significant**
 
   Prevents malicious modification of critical data, thus preventing
   data bit flips of DNSSEC signed data.  However, it does not prevent
@@ -493,7 +505,7 @@ Solutions to detecting and rejecting bitfliped data include:
   Research has shown that some validating resolvers fail to detect
   when some bit flipping situations have occurred, however.
 
-- LocalRoot: Complete
+- **LocalRoot: Complete**
 
   LocalRoot implementations download and verify the entire contents of
   the root zone, including glue records, and thus eliminates this
