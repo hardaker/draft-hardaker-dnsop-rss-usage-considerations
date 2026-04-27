@@ -87,12 +87,8 @@ informative:
 
 This document explores various technologies developed to enhance the DNS,
 focusing specifically on interactions with the DNS Root Server System (RSS). It
-examines recently developed protocols and evaluates their impact on
+examines a number of the protocols and evaluates their impact on
 communication with the RSS.
-
-The document begins by briefly describing and referencing various communication
-enhancements in {{techniques}}. It then provides an analysis of how these
-enhancements impact communication with the RSS in {{analysis}}.
 
 --- middle
 
