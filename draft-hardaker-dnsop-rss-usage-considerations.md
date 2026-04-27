@@ -436,37 +436,38 @@ non-glue records include:
 ### Non-authoratative Data (Glue) Protection {#glue}
 
 Although DNSSEC protects many of the records within the root zone, the
-TLD's NS, A and AAAA records are not signed.  Thus they could be
-modified by machine-in-the-middle attacks, cache injection techniques,
-etc to either block traffic by changing the addresses to servers that
-don't respond to create a denial of service issue.
+TLD's NS, A and AAAA records in the root zone are not signed.  Thus,
+they could be modified to create a denial of service scenario by
+changing the addresses to servers that don't respond (potentially by
+using machine-in-the-middle attacks, cache injection techniques, etc).
 
-Alternatively, they can be modified to point to alternate addresses
-that actually do respond.  These addresses will be unable to alter
-records that have been properly verified with DNSSEC, however even
-while responding with properly signed records they could be used as a
-form of surveillance by continuing to proxy legitimate requests while
-recording the transactions.  Note that NS and glue records from the
-root zone are typically cached for a lengthy period of time, which is
-a benefit for resolvers that receive the correct records but a
-detriment for those that receive modified records and have a
-parent-side preference.
+Alternatively, the addresses can be modified to point to alternate
+addresses that actually do respond.  These responding addresses will
+be unable to alter records in the root zone that have been properly
+signed with DNSSEC, they modified glue can still serve as a form of
+surveillance while continuing to proxy legitimate requests.  Note that
+NS and glue records from the root zone are typically cached for a
+lengthy period of time, which is a benefit for resolvers that receive
+the correct records but a detriment for those that receive modified
+records and have a parent-side preference.
 
 Solutions to this problem space include:
 
 - **DNSSEC: None to Significant**
 
-  DNSSEC prevents malicious modification of critical data, thus
-  preventing false insertion of data that is not signed.  However, it
-  does not prevent NS and glue record modification.  The protection
-  offered by DNSSEC depends on whether the resolver uses DNSSEC to
-  validate the child side NS, A and AAAA records or only believes
-  caches and uses the parent records.  Furthermore the TLD in use must
-  be signed for this protection to be effective.
+  DNSSEC prevents malicious modification of authoritative records in
+  DNS zones, thus preventing false insertion of data that is not
+  signed.  However, as discussed above, it does not prevent NS and
+  glue record modification.  The protection offered by DNSSEC depends
+  on whether the resolver uses DNSSEC to validate the child side NS, A
+  and AAAA records.  Furthermore the TLD in use must be signed for
+  this protection to be effective for root zone data.
 
-- LocalRoot implementations {{LOCALROOT}} download and verify the
-  entire contents of the root zone, including NS and glue records, and
-  thus eliminates this threat entirely.
+- **LocalRoot: Complete**
+
+  LocalRoot implementations download and verify the entire contents of
+  the root zone, including NS and glue records, and thus eliminates
+  this threat entirely.
 
 - **Encrypted DNS: Complete**
 
