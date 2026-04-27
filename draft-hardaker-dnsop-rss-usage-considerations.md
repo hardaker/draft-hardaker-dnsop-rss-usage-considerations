@@ -260,13 +260,13 @@ various techniques are available for use that include:
   Aggressive NSEC leverages NSEC records to prevent redundant queries for
   non-existent TLDs. Validating resolvers can use NSEC records to synthesize
   negative responses for non-existent TLDs based on previously received NSEC
-  records. For example, if a query for a non-existent TLD (e.g.,
-  ".example")will return an NSEC record cryptographically proving that the no
-  names between .events and exchange exist. Subsequent queries within the NSEC
-  TTL for a non-existent TLD that falls between .events and .exchange (e.g.,
+  records. For example, a query for a non-existent TLD (e.g.,
+  ".example") will return an NSEC record cryptographically proving that the no
+  names between ".events" and ".exchange" exist. Subsequent queries within the NSEC
+  TTL for a non-existent TLD that falls between ".events" and ".exchange" (e.g.,
   ".evil") can be answered immediately without sending a query to the RSS.
 
-  The rough worst case scenario with a long lived cache is a transmission of 1
+  The rough worst-case scenario with a long lived cache is a transmission of 1
   query per TLD in the root zone in the course of one TTL (2 days, or other
   implementation upper limit which can commonly be 1 day).  Note that resolvers
   that prefer client NS records, which often have a lower TTL, may send data
@@ -291,19 +291,20 @@ various techniques are available for use that include:
   Encrypted DNS protocols, such as DNS over TLS, protect queries from
   intermediate observers by encrypting the communication. However, as of this
   writing, only two of the 13 root server identifiers support encrypted DNS,
-  limiting its effectiveness.
+  limiting the effectiveness of this technique.
 
 - **LocalRoot: Complete**
 
-  LocalRoot implementations maintain a local copy of the root zone, thereby
-  completely eliminating the need to send queries to the RSS. This ensures
-  complete privacy, as no queries leave the resolver.
+  LocalRoot implementations maintain a local copy of the root zone,
+  thereby completely eliminating the need to send queries to the
+  RSS. This ensures complete privacy with respect the RSS, as no
+  queries leave the resolver toward the RSS.
 
-  Furthermore, because the data is received and verified before being used,
-  locally, there are only two remaining sources of trust for the information
-  used: IANA itself and the RZM who are responsible for creating the root zone,
-  although even they have no visibility into how resolvers make use of the
-  data.
+  Furthermore, because the data is received and verified before being
+  used, there are only two remaining sources of trust for the
+  information used: IANA itself and the RZM which is responsible for
+  creating the root zone, although even they have no visibility into
+  how resolvers make use of the data.
 
 ## Latency
 
