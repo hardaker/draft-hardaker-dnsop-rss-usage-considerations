@@ -406,12 +406,14 @@ non-glue records include:
   DNSSEC protects against record modification for records served from
   the RSS, assuming validation is performed using a root zone DNSSEC
   trust anchor and followed all the way to the child zone.  Note that
-  not all records in the root zone are protected, and thus this
-  is considered Significant since most TLDs do offer DNSSEC support.
+  not all records in the root zone are protected, and thus this is
+  considered Significant since most TLDs do offer DNSSEC support and
+  most resolvers are child-centric.
 
-  Note that because DNSSEC combined with NSEC records allows
-  verification of negative answers received from the root.  The
-  non-existent records are actually authoratative at the root.
+  Note that DNSSEC, when combined with NSEC records, allows
+  verification of negative answers received from the root.  Thus,
+  responses for non-existent records from the root are verifiable as
+  authentic.
 
 - **LocalRoot: Complete**
 
@@ -425,10 +427,11 @@ non-glue records include:
   If the resolver is able to connect to a root server instance that
   offers authenticated and encrypted DNS support, then any answers
   they receive over that protected path can be considered properly
-  validated, even without checking the corresponding DNSSEC records.
-  Although checking the DNSSEC records for validity themselves is
-  still recommended.  And this presumes that some trust mechanism is
-  used to bootstrap the authentication of the RSS instance used.
+  validated even without checking the corresponding DNSSEC records.
+  Although, checking the DNSSEC records for validity themselves is
+  still recommended.  This completeness presumes that some trust
+  mechanism is used to bootstrap the TLS authentication of the RSS
+  instance with which communication is established.
 
 ### Non-authoratative Data (Glue) Protection {#glue}
 
