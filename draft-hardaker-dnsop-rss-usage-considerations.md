@@ -93,9 +93,10 @@ communication with the RSS.
 --- middle
 
 # Introduction
+
 This document explores various technologies developed to enhance the DNS,
 focusing specifically on interactions with the DNS Root Server System (RSS). It
-examines recently developed protocols and evaluates their impact on
+examines a number of the protocols and evaluates their impact on
 communication with the RSS.
 
 While the necessity of a centralized source for a unique internet naming system
@@ -111,37 +112,40 @@ enhancements impact communication with the RSS in {{analysis}}.
 To evaluate the potential changes to RSS communication in {{analysis}}, this
 document categorizes the solutions using the following keywords:
 
-- **Minimal**: The technique addresses the problem with only a minimal amount
+- **Minimal**: The technique addresses a problem with only a minimal amount
   of improvement.
 - **Moderate**: The technique provides a moderate level of improvement in
-  addressing the problem.
+  addressing a problem.
 - **Significant**: The technique offers substantial improvement for
   communicating with the RSS, even though it does not entirely address the
   problem space.
-- **Complete**: The technique fully enhances communication with the RSS or
+- **Complete**: The technique fully enhances communication with the RSS and/or
   completely mitigates the defined concern.
 
 # Techniques Improving Communication with the RSS {#techniques}
 
-This section outlines various techniques designed to improve communication with
-the DNS Root Server System (RSS), particularly in addressing security concerns.
-These techniques are further analyzed in {{analysis}} to evaluate their
-effectiveness in different scenarios.
+This section outlines various techniques designed to improve
+communication with the DNS Root Server System (RSS), particularly in
+addressing security or efficiency concerns.  These techniques are
+further analyzed in {{analysis}} to evaluate their effectiveness in
+mitigating each of the concerns.
 
 ## QName Minimization
 
 The original DNS protocol specifications {{RFC1035}} indicated that
 the entire query name being handled by a resolver should be sent to
 upstream authoritative servers; this leaks all labels in a query to
-all the authoritative servers used in the resolution process.  The DNS
-Query Name Minimisation to Improve Privacy {{RFC9156}} specification
-describes how recursive resolvers can minimize the privacy leakage by
-describing how the resolver "no longer always sends the full original
-QNAME and original QTYPE to the upstream name server."
+all the authoritative servers used in the resolution process even when
+the authoritative server doesn't need all the labels to generate a
+response.  The "DNS Query Name Minimisation to Improve Privacy"
+{{RFC9156}} specification describes how recursive resolvers can
+minimize this privacy leakage by describing how the resolver "no
+longer always sends the full original QNAME and original QTYPE to the
+upstream name server."
 
 ## Aggressive NSEC
 
-The Aggressive Use of DNSSEC-Validated Cache {{RFC8198}} {{RFC9077}}
+The "Aggressive Use of DNSSEC-Validated Cache" {{RFC8198}} {{RFC9077}}
 specification describes how validating recursive resolvers can reduce the
 number of queries sent to authoritative servers by allowing "DNSSEC-validating
 resolvers to generate negative answers within a range and positive answers from
@@ -157,25 +161,25 @@ queries are sent and more responses can be generated from the cache.
 
 ## Encrypted DNS
 
-There are a variety of protocols that enable encrypted DNS transactions both
-between stubs and recursive resolvers, and recursive resolvers and
-authoritative servers. These include DNS over Transport Layer Security (TLS)
-{{RFC7858}} and DNS over Datagram Transport Layer Security (DTLS) {{RFC8094}}
-(along with supplemental information {{RFC8310}}) which collectively are
-referred to as "DNS over (D)TLS".
+There are a variety of protocols that enable encrypted DNS
+transactions both between stubs and recursive resolvers, and recursive
+resolvers and authoritative servers. These include "DNS over Transport
+Layer Security" (TLS) {{RFC7858}} and "DNS over Datagram Transport
+Layer Security (DTLS)" {{RFC8094}} (along with supplemental
+information {{RFC8310}}) which collectively are referred to as "DNS
+over (D)TLS".
 
-In addition, DNS Queries over HTTPS (DoH) {{RFC8484}}, DNS over Dedicated QUIC
-Connections {{RFC9250}}, and Oblivious DNS over HTTPS {{RFC9230}} enable DNS
+In addition, "DNS Queries over HTTPS (DoH)" {{RFC8484}}, "DNS over Dedicated QUIC
+Connections" {{RFC9250}}, and "Oblivious DNS over HTTPS" {{RFC9230}} enable DNS
 over encrypted HTTP transports.
 
 By encrypting the communication, these protocols prevent intermediate entities
 from observing the contents of DNS queries, thus improving privacy for users.
 
-The Unilateral Opportunistic Deployment of Encrypted Recursive-to-Authoritative
+The "Unilateral Opportunistic Deployment of Encrypted Recursive-to-Authoritative"
 DNS {{RFC9539}} specification defines how recursive resolvers can communicate
-with authoritative servers that support encrypted TLS sessions. At this time,
-the specification is published under an EXPERIMENTAL status.
-
+with authoritative servers that support encrypted TLS sessions. However,
+the specification is currently published under an EXPERIMENTAL status.
 
 ## Serve Stale
 
@@ -196,18 +200,19 @@ origin, authenticity, and correctness of DNS data.
 
 ## LocalRoot
 
-LocalRoot enables recursive resolvers to maintain and use a local copy of the
-root zone, eliminating the need to query the root servers directly. This
-concept has been documented for over a decade in {{RFC7706}}, {{RFC8806}}, and
-{{LOCALROOT}}, and in academic research {{NOROOTS}}, {{ROOTPRIVACY}}. It is
-implemented in {{BINDMIRROR}}, {{KNOTMODULE}}, {{UNBOUNDAUTHZONE}},
-{{LOCALROOTISI}}.
+LocalRoot enables recursive resolvers to maintain and use a local copy
+of the root zone, eliminating the need to query the root servers
+directly. This concept has been documented for over a decade in
+{{RFC7706}}, {{RFC8806}}, and {{LOCALROOT}}, and in academic research
+{{NOROOTS}}, {{ROOTPRIVACY}}. It is implemented in {{BINDMIRROR}},
+{{KNOTMODULE}}, {{UNBOUNDAUTHZONE}}, {{LOCALROOTISI}}.
 
-The initial LocalRoot implementations relied on AXFR for transferring root zone
-data. More recent implementations instead support HTTP-based transfers,
-providing additional flexibility and scalability. By using LocalRoot, resolvers
-can improve privacy, reduce dependency on external servers, and ensure
-consistent access to root zone data.
+The initial LocalRoot implementations relied on AXFR for transferring
+root zone data. More recent implementations instead support HTTP-based
+transfers, providing additional flexibility and scalability.
+
+By using LocalRoot, resolvers can improve privacy, reduce dependency
+on external servers, and ensure consistent access to root zone data.
 
 # Centralized vs Decentralized RSS Characteristics {#analysis}
 
