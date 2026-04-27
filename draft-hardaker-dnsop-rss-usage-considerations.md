@@ -375,23 +375,24 @@ disconnected from the RSS:
 
 ## Record Protection {#records}
 
-DNSSEC RRSIG records protects resource records (RRs) in DNS zones.
-The only exception to this protection is when data records are
-intended to be helpful as they're authoritative in a child.  These
+DNSSEC RRSIG records ensures the integrity and authenticity of the
+resource records (RRs) in DNS zones.  The only exception to this
+protection is when records are only intended as delegation information
+that is helpful to resolvers trying to reach a child zone.  These
 unprotected records on the parent side include both NS records served
-by the parent and associated address records (glue records).  Once the
-parent has requested the same information from the child, and the DS
-record has been followed, then the child's information becomes
-authoritative and verified.  However, if the parent side's information
-is modified in any way, it may lead the resolver to the wrong
-infrastructure at least initially.  With DNSSEC validation happening
-this should result in a denial of service or temporary eves-dropping
-issue at most.
+by the parent and associated address records (glue records).  
 
-For analyzing how the techniques listed in this draft affect these
-communication patterns, we break the analysis into two parts of the
-RSS (parent) record sets: authoritative RR protection and
-non-authoratative (glue) records.
+Once the parent verifies that the child is serving the information,
+and the DS record has been followed and validates the child's DNSKEY,
+then the child's information becomes authoritative.  However, if the
+parent side's information is modified in any way, it may initially
+lead the resolver to the wrong infrastructure.  With DNSSEC validation
+enabled, this should result in a denial of service or temporary
+eves-dropping issue at most.
+
+We break our analysis of record protection into two parts: protection
+of the the authoritative RRs and protection of the non-authoratative
+delegation records (NS and glue).
 
 ### Authoritative RR Protection
 
