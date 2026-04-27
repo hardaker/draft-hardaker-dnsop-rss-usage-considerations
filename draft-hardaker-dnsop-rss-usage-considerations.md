@@ -308,12 +308,11 @@ various techniques are available for use that include:
 
 ## Latency
 
-Even though almost all answers to user queries are served from the cache, many
+Even though almost all answers to user queries are served from the cache, some
 resolver operators are concerned about the latency of queries sent to the RSS.
 In addition, because negative answers are frequent and may be
-from end-user typos or similar, latency to the RSS does matters at
-least a little as a user may be directly waiting for a response before
-realizing their error.  In fact, this is one motivation listed in
+from end-user typos waiting for a response, latency to the RSS at
+least matters a little.  In fact, this is one motivation listed in
 {{RFC8806}} for implementing LocalRoot.
 
 Techniques that support reducing latency to the root, often by having
@@ -322,16 +321,16 @@ the answers already available, include:
 - **Aggressive NSEC: Significant**
 
   With Agressive NSEC deployed, queries containing right-most labels
-  (TLD labels) that are not in the root and are covered by an NSEC
-  record that is in the (validating) resolver's cache are not sent and
-  thus answerable immediately.  The result is similar to privacy
+  (TLD labels) that are not in the root and may be answered
+  immediately by generating the answer using an NSEC record in the
+  (validating) resolver's cache.  The result is similar to the privacy
   analysis showing that Aggressive NSEC provides significant latency
   reduction to the root zone.
 
 - **LocalRoot: Complete**
 
-  As above, a LocalRoot implementation already has the information in
-  the root zone and thus can answer immediately and without sending
+  As above, a LocalRoot implementation already has all the records in
+  the root zone and thus can answer immediately and without ever sending
   any queries to the RSS.
 
 - **Serve Stale: N/A**
@@ -346,9 +345,9 @@ At times a region may become disconnected from the larger internet
 from a variety of causes (network outages, intentional disruptions,
 natural catastrophes, etc).  In this situation, because the RSS serves
 as the pinnacle of the DNS, any resolver needing information about
-TLDs not in their cache would be effectively unable to respond to that
-branch of the DNS tree.  Obviously a complete disconnection from the
-Intenet means all resolutions will fail, but at times local
+TLDs not in their cache would be effectively unable to contact that
+branch of the DNS tree.  Obviously, a complete disconnection from the
+Intenet means all resolutions will fail.  However, at times local
 infrastructure may still be viable and reachable (for example, a ccTLD
 may be reachable even when the RSS is not).
 
@@ -360,16 +359,18 @@ disconnected from the RSS:
   As Serve Stale allows resolvers to re-use past data when
   authoritative servers are unreachable, it significantly helps in
   disconnected situations as long as the needed records are in the
-  cache.
+  cache.  It cannot help when the needed information has not been
+  recently cached, though.
 
 - **LocalRoot: Significant or Complete**
 
   LocalRoot implementations that fill their cache with records from
-  the root zone should be similarly protected as Serve Stale, as cache
+  the root zone should be Significantly protected as Serve Stale, as cache
   records may still be expunged when not recently used.
+  
   Implementations that always make root zone contents available
   (e.g. via classic RFC8806 parallel infrastructure or special
-  don't-expunge cache flags) will be completely protected from a
+  don't-expunge cache flags) will be Completely protected from a
   disconnection with the RSS.
 
 ## Record Protection {#records}
