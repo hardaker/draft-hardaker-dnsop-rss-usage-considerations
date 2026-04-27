@@ -221,23 +221,28 @@ on recursive resolvers' communication with the Root Server System (RSS).
 
 ## Privacy
 
-Queries sent to the RSS include those for existing Top-Level Domains (TLDs)
-(e.g., .com, .org) and queries for non-existent domains (e.g.,
-sensitive.internal, or sensitive.con (sic)).
+Queries sent to the RSS include those within existing Top-Level Domains (TLDs)
+(e.g., ".com", ".org") and for queries under non-existent domains (e.g.,
+"sensitive.internal", sensitive.con" (sic)).
 
-When a resolver's cache lacks an answer, the query is forwarded to the RSS. This
-exposes the query to the 12 Root Server Operators (RSOs) managing the 26 RSS
-identifiers (13 IPv4 and 13 IPv6) and the networks in between.
+When a resolver's cache lacks an answer for the associated TLD, the
+query is forwarded to the RSS. This exposes the query to the 12 Root
+Server Operators (RSOs) managing the 26 RSS identifiers (13 IPv4 and
+13 IPv6) and the networks in between.
 
 The privacy sensitivity of queries sent to the RSS can vary widely
 ranging from unlikely sensitive (such as a query for just ".example"
-without any left-hand labels) or more critical queries that leak
+without any left-hand labels) to more critical queries that leak
 potentially personal or system-sensitive information that was not
 intended to leak beyond an internal network boundary (such as
-".wpad").  These accidental leaks can stem from typos, web browser
-keyword searches, misconfigured software, or simply because it needed
-to be resolved, and no privacy-protecting techniques listed below were
-deployed.
+".wpad").  Names reaching the RSS could be single labels that reveal
+only the TLD's name (".com" or ".xxx") and may or may not be sensitive
+in nature.  Queries could also contain more labels that leak
+more sensitive information ("private.sensitive.example").
+
+Accidental leaks can stem from typos, web browser keyword searches,
+misconfigured software, or simply because it needed to be resolved,
+and no privacy-protecting techniques listed below were deployed.
 
 Note that beyond the analysis of a single record being observed, a
 larger or temporal analysis of all of a client's queries may reveal
