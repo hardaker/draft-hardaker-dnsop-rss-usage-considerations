@@ -316,7 +316,8 @@ various causes, such as network outages, intentional disruptions, or natural
 disasters. In such scenarios, the Root Server System (RSS), as the pinnacle of
 the DNS hierarchy, becomes inaccessible to resolvers needing information about
 TLDs not in their cache. While a complete disconnection from the internet
-results in all resolutions failing, local infrastructure may still function and
+results in failures for all resolutions to external resources, 
+local infrastructure may still be functioning and
 remain reachable (e.g., a ccTLD may be accessible even if the RSS is not).
 
 Solutions available for resolvers to continue operating even when disconnected
@@ -325,18 +326,19 @@ from the RSS include:
 - **Serve Stale: Significant**
 
   Serve Stale allows resolvers to reuse cached data when authoritative servers
-  are unreachable. This approach significantly aids in disconnected scenarios,
+  are unreachable. This approach can significantly aid disconnected scenarios,
   provided the required records are already in the cache. However, it cannot
   assist when the necessary information has not been recently cached.
 
 - **LocalRoot: Significant or Complete**
 
   LocalRoot implementations that populate their cache with root zone records
-  offer significant protection, similar to Serve Stale, as cached records may
+  offer significant protection, similar to Serve Stale.  But cached records may
   still expire if not recently accessed.
 
-  Implementations that ensure the root zone contents are always available
-  (e.g., via RFC8806 parallel infrastructure or special cache retention flags)
+  Implementations that ensure the root zone contents are always
+  available (e.g., via RFC8806 parallel infrastructure, special cache
+  retention flags, or when loaded from a persistently refreshed file)
   provide complete protection against RSS disconnection.
 
 ## Record Protection {#records}
@@ -347,15 +349,16 @@ associated glue records, are exceptions to this protection. These records,
 served by the parent zone, assist resolvers in reaching child zones but are not
 cryptographically signed.
 
-Once the parent verifies that the child zone is serving accurate information
+Once the resolver verifies that the child zone is serving accurate information
 and the DS record validates the child's DNSKEY, the child's data becomes
 authoritative. If the parent-side delegation records are modified, resolvers
 may initially be directed to incorrect infrastructure. With DNSSEC validation
 enabled, this would result in a denial of service or, at worst, a temporary
 eavesdropping issue.
 
-We analyze record protection in two parts: authoritative RR protection and
-non-authoritative delegation record protection (NS and glue).
+We analyze record protection by dividing it into in two parts:
+authoritative RR protection and non-authoritative delegation record
+protection (NS and glue).
 
 ### Authoritative RR Protection
 
@@ -364,11 +367,11 @@ ensuring tamper resistance. Solutions for safeguarding these records include:
 
 - **DNSSEC: Significant**
 
-
   DNSSEC protects against record modification for records served from
   the RSS, assuming validation is performed using a root zone DNSSEC
-  trust anchor and followed all the way to the child zone.  Note that
-  not all records in the root zone are protected, and thus this is
+  trust anchor and the chain of trust from it is followed all the way
+  to the child zone.  Note that
+  not all TLDs in the root zone are protected, and thus this is
   considered Significant since most TLDs do offer DNSSEC support and
   most resolvers are child-centric.
 
@@ -377,36 +380,39 @@ ensuring tamper resistance. Solutions for safeguarding these records include:
   responses for non-existent records from the root are verifiable as
   authentic.
 
-- **LocalRoot: Complete**
-
-  LocalRoot implementations download and verify the entire root zone using
-  DNSSEC and ZONEMD records, ensuring all data is tamper-resistant. Proper
-  DNSSEC validation of at least the ZONEMD record is required.
-
 - **Encrypted DNS: Complete**
 
   If the resolver is able to connect to a root server instance that
   offers authenticated and encrypted DNS support, then any answers
   they receive over that protected path can be considered properly 
   validated even without checking the corresponding DNSSEC records.
-  Although, checking the DNSSEC records for validity themselves is
-  still recommended.  Encrypted DNS protection is considered Complete
+  However, checking the DNSSEC records for validity themselves may
+  still be recommended.  Encrypted DNS protection is considered Complete
   when the authentication of the TLS connection to the RSS can be properly 
   verified.
 
-### Non-Authoritative Data (Glue) Protection {#glue}
+- **LocalRoot: Complete**
 
+  LocalRoot implementations download and verify the entire root zone using
+  DNSSEC and ZONEMD records, ensuring all data is tamper-resistant. Proper
+  DNSSEC validation of at least the ZONEMD record is required.
+
+### Non-Authoritative Data (Glue) Protection {#glue}
 
 Although DNSSEC protects many of the records within the root zone, the
 TLD's NS, A and AAAA records in the root zone are not signed. 
-This lack of signing leaves these records vulnerable to attacks such as man-in-the-middle modifications 
-or cache injection. These attacks could redirect traffic to non-responsive servers, 
+This lack of signing leaves these records vulnerable to attacks
+such as man-in-the-middle modifications 
+or cache injection. 
+
+These attacks could redirect traffic to non-responsive servers, 
 causing denial-of-service issues.
 
 Alternatively, the addresses can be modified to point to alternate
 addresses that do respond.  While these responding addresses will
 be unable to alter DNSSEC signed records in the root zone, 
-they can still modify the unsigned glue records.
+they can still act as eavesdroppers and modify any unsigned glue
+records being passed.
 
 Note that
 NS and glue records from the root zone are typically cached for a
@@ -419,31 +425,36 @@ Mitigation strategies include:
 - **DNSSEC: None to Significant**
 
   DNSSEC prevents unauthorized modification of authoritative records in
-  DNS zones, ensuring that unsigned data cannot be falsely inserted.  
+  DNS zones, ensuring that unsigned data cannot be falsely inserted. 
   However, as discussed above, it does not prevent NS and
   glue record modification.  The protection offered by DNSSEC depends
-  on whether the resolver uses DNSSEC to validate the child side NS, A
-  and AAAA records.    Furthermore, the TLD must be signed for this protection to be effective.
+  on whether the resolver uses DNSSEC to validate the child side's NS, A
+  and AAAA records.
+  Furthermore, the TLD must be signed for this protection to be effective.
+
+- **Encrypted DNS: Complete**
+
+  Encrypted DNS provides secure communication with
+  root server instances, provided their 
+  identities are properly verified. 
+  Data received over these secure channels can be considered 
+  authentic and encrypted. 
+  However, since NS glue records in the parent
+  zone lack RRSIGs, DNSSEC validation still requires 
+  consultation with the child zone for data authenticity verification.
 
 - **LocalRoot: Complete**
 
   LocalRoot implementations download and verify the entire contents of
-  the root zone, including NS and glue records, effectively eliminating this threat.
-
-- **Encrypted DNS: Complete**
-
-  Encrypted DNS provides secure communication with root server instances, provided their 
-  identities are properly verified. Data received over these secure channels can be considered 
-  authentic and encrypted. 
-  However, since NS glue records in the parent zone lack RRSIGs, DNSSEC validation still requires 
-  consultation with the child zone for data authenticity verification.
+  the root zone, including NS and glue records, 
+  effectively eliminating this threat.
 
 ## Bit Flipping
 
 "Bit flipping" is the term used to describe accidental modifications
 to bits due to memory corruption in a device or during transmission.
 The net effect is that at least one bit may flip randomly from 0 to 1,
-or vice versa.  Though rare, they have been measured in the world in
+or vice versa.  Though rare, they have been measured in
 network traffic arriving at very popular servers of all types.
 
 The root-servers.net zone is, unsurprisingly, a very popular domain: it
@@ -468,7 +479,8 @@ Solutions to detecting and rejecting bitflipped data include:
   data with modifications of any kind, including bit flipping
   techniques.
   However, DNSSEC does not prevent NS and glue record
-  modification since these records, as discussed above, are not protected by DNSSEC
+  modification since these records, as discussed above, 
+  are not protected by DNSSEC
   unless verified through to the client's copy of the records.
 
   Research has shown that some validating resolvers fail to detect when some
@@ -477,7 +489,8 @@ Solutions to detecting and rejecting bitflipped data include:
 - **LocalRoot: Complete**
 
   LocalRoot implementations within resolvers download and verify the
-  entire contents of the root zone, including glue records, and thus
+  entire contents of the root zone using DNSSEC and ZONEMD, 
+  including associated glue records, and thus
   eliminates this threat entirely for incoming queries.
 
 ## Latency {#latency}
