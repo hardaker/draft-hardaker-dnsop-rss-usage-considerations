@@ -533,8 +533,7 @@ In summary, the following table summarizes the analysis in
 {{techniques}} and how they affect communication with the RSS.
 
 |---------------|--------|--------|----------|--------|--------|-----------|
-|               | QName  | Aggr.  | Encrypt  | Serve  | DNSSEC | LocalRoot |
-|               | Min    | NSEC   | DNS      | Stale  |        |           |
+|               | QName-Min  | Aggr.-NSEC  | Encrypt  | Serve-Stale  | DNSSEC | LocalRoot |
 |---------------|--------|--------|----------|--------|--------|-----------|
 | Privacy       | Signif | Signif | Moderate |        |        | Complete  |
 | Disconnection |        |        |          | Signif |        | Complete* |
