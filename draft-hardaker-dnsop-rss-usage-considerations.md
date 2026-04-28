@@ -309,39 +309,6 @@ various techniques are available for use that include:
   creating the root zone, although even they have no visibility into
   how resolvers make use of the data.
 
-## Latency {#latency}
-
-Even though almost all answers to user queries are served from the cache, some
-resolver operators are concerned about the latency of queries sent to the RSS.
-In addition, because negative answers are frequent and may be
-from end-user typos waiting for a response, latency to the RSS at
-least matters a little.  In fact, this is one motivation listed in
-{{RFC8806}} for implementing LocalRoot.
-
-Techniques that support reducing latency to the root, often by having
-the answers already available, include:
-
-- **Aggressive NSEC: Significant**
-
-  With Aggressive NSEC deployed, queries containing right-most labels
-  (TLD labels) that are not in the root may be answered
-  immediately by generating the answer using an NSEC record in the
-  (validating) resolver's cache.  The result is similar to the privacy
-  analysis showing that Aggressive NSEC provides significant latency
-  reduction to the root zone.
-
-- **LocalRoot: Complete**
-
-  As above, a LocalRoot implementation already has all the records in
-  the root zone and thus can answer immediately and without ever sending
-  any queries to the RSS.
-
-- **Serve Stale: N/A**
-
-  Note that though Serve Stale may have an answer in the cache that is
-  usable, it does not help with latency since the answer should not be
-  used until an attempt to query the RSS has already been made.
-
 ## Disconnected operations
 
 At times, a region may become disconnected from the broader internet due to
@@ -513,6 +480,39 @@ Solutions to detecting and rejecting bitflipped data include:
   entire contents of the root zone, including glue records, and thus
   eliminates this threat entirely for incoming queries.
 
+## Latency {#latency}
+
+Even though almost all answers to user queries are served from the cache, some
+resolver operators have concerns about the latency of queries sent to the RSS.
+In addition, because negative answers are frequent and may be
+from end-user typos waiting for a response, latency to the RSS may at
+least matter a little.  In fact, this is one motivation listed in
+{{RFC8806}} for implementing LocalRoot.
+
+Techniques that support reducing latency to the root, often by having
+the answers already available, include:
+
+- **Aggressive NSEC: Significant**
+
+  With Aggressive NSEC deployed, queries containing right-most labels
+  (TLD labels) that are not in the root may be answered
+  immediately by generating the answer using an NSEC record in the
+  (validating) resolver's cache.  The result is similar to the privacy
+  analysis showing that Aggressive NSEC provides significant latency
+  reduction to the root zone.
+
+- **LocalRoot: Complete**
+
+  As above, a LocalRoot implementation already has all the records in
+  the root zone and thus can answer immediately and without ever sending
+  any queries to the RSS.
+
+- **Serve Stale: N/A**
+
+  Note that though Serve Stale may have an answer in the cache that is
+  usable, it does not help with latency since the answer should not be
+  used until an attempt to query the RSS has already been made.
+
 # Summary
 
 In summary, the following table summarizes the analysis in
@@ -524,11 +524,11 @@ In summary, the following table summarizes the analysis in
 |               | Min    | NSEC   | DNS      | Stale  |        |           |
 |---------------|--------|--------|----------|--------|--------|-----------|
 | Privacy       | Signif | Signif | Moderate |        |        | Complete  |
-| Latency       |        | Signif |          |        |        | Complete  |
 | Disconnection |        |        |          | Signif |        | Complete* |
 | Auth Prot     |        |        | Complete |        | Signif | Complete  |
 | Non-auth Prot |        |        | Complete |        | Signif | Complete  |
 | Bit Flipping  |        |        |          |        | Signif | Complete  |
+| Latency       |        | Signif |          |        |        | Complete  |
 |---------------|--------|--------|----------|--------|--------|-----------|
 
 (*): as discussed above, this depends on the implementation with some
