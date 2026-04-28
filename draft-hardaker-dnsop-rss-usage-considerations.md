@@ -462,11 +462,11 @@ Mitigation strategies include:
 
 - **Encrypted DNS: Complete**
 
-  Encrypted DNS ensures secure communication with root server instances, provided their 
+  Encrypted DNS provides secure communication with root server instances, provided their 
   identities are properly verified. Data received over these secure channels can be considered 
-  authentic and encrypted. However, since glue records lack RRSIGs, DNSSEC validation is not 
-  possible post-reception, requiring consultation with the child zone for verification.
-  {{WK: As above - I think that we need to discuss this. I'm not sure I'm following}}
+  authentic and encrypted. 
+  However, since NS glue records in the parent zone lack RRSIGs, DNSSEC validation still requires 
+  consultation with the child zone for data authenticity verification.
 
 ## Bit Flipping
 
