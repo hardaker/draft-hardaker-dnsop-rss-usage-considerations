@@ -470,35 +470,35 @@ Mitigation strategies include:
 
 ## Bit Flipping
 
-Bit flipping is the accidental modifications to bits due to memory
-corruption in one of the processing hosts or during transmission.  The net
-effect is that at least one bit may flip randomly from 0 to 1, or vice versa,
-although hopefully with low probability.  Though rare, they have been measured
-in the world in network traffic arriving at very popular servers of all types.
+"Bit flipping" is the term used to describe accidental modifications
+to bits due to memory corruption in a device or during transmission.
+The net effect is that at least one bit may flip randomly from 0 to 1,
+or vice versa.  Though rare, they have been measured in the world in
+network traffic arriving at very popular servers of all types.
 
 The root-servers.net zone is, unsurprisingly, a very popular domain: it
 bootstraps all Internet DNS resolutions.  Researchers have shown that by
 registering alternate domain names with single or double bit flips in the
 root-servers.net domain name allows these alternate servers to receive requests
-to them intended to be sent to the real root-servers.net domain.  These bit
-flips can cause problems similar to as the above discussed glue record
+that were intended to be sent to the real root-servers.net domain.  These bit
+flips can cause problems similar to the above discussed glue record
 modifications ({{glue}}).
 
-Cryptographic techniques like DNSSEC properly identify and reject data with
-modifications of any kind, including bit flipping techniques. Note that in this
-section we only discuss bitflips that are received by the resolver, or for
-answers coming back to queries from the RSS as an authoritative server being
-queried.  Bitflips that occur in packets leaving the resolver toward the client
-submitting the original request are out of scope and not covered in this
-document as the resolver has no control over them.
+Note that in this section we only discuss bitflips that are received
+by or sent by the resolver.  Bitflips that occur in packets leaving
+the resolver toward the client that submitted the original query are
+out of scope and not covered in this document as the resolver (and the
+RSS) has no control over them.
 
 Solutions to detecting and rejecting bitflipped data include:
 
 - **DNSSEC: Significant**
 
-  Prevents malicious modification of critical data, thus preventing data bit
-  flips of DNSSEC signed data.  However, it does not prevent NS and glue record
-  modification as glue records, as discussed above, are not protected by DNSSEC
+  Cryptographic techniques like DNSSEC properly identify and reject
+  data with modifications of any kind, including bit flipping
+  techniques.
+  However, DNSSEC does not prevent NS and glue record
+  modification since these records, as discussed above, are not protected by DNSSEC
   unless verified through to the client's copy of the records.
 
   Research has shown that some validating resolvers fail to detect when some
@@ -506,9 +506,9 @@ Solutions to detecting and rejecting bitflipped data include:
 
 - **LocalRoot: Complete**
 
-  LocalRoot implementations download and verify the entire contents of the root
-  zone, including glue records, and thus eliminates this threat entirely for
-  incoming queries.
+  LocalRoot implementations within resolvers download and verify the
+  entire contents of the root zone, including glue records, and thus
+  eliminates this threat entirely for incoming queries.
 
 # Summary
 
@@ -543,8 +543,7 @@ and associated trade-offs.
 
 # IANA Considerations
 
-TBD: describe the request for IANA to support a list of root server
-publication points at TBD-URL.
+None.
 
 --- back
 
