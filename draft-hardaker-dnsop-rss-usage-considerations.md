@@ -153,6 +153,16 @@ number of queries sent to authoritative servers by allowing "DNSSEC-validating
 resolvers to generate negative answers within a range and positive answers from
 wildcards."
 
+[ Ed note: The NSEC example used in this paragraph is an accurate example as of this writing, but may change over time.]
+Aggressive NSEC leverages NSEC records to prevent redundant queries for
+non-existent TLDs. Validating resolvers can use NSEC records to synthesize
+negative responses for non-existent TLDs based on previously received NSEC
+records. For example, a query for a non-existent TLD (e.g.,
+".example") will return an NSEC record cryptographically proving that the no
+names between ".events" and ".exchange" exist. Subsequent queries within the NSEC
+TTL for a non-existent TLD that falls between ".events" and ".exchange" (e.g.,
+".evil") can be answered immediately without sending a query to the RSS.
+
 This technique is particularly effective in reducing queries to the RSS for
 non-existent TLDs, as once a single query between two valid TLDs has been sent,
 validating resolvers can make use of the returned NSEC records to prevent
@@ -174,9 +184,6 @@ over (D)TLS".
 In addition, "DNS Queries over HTTPS (DoH)" {{RFC8484}}, "DNS over Dedicated QUIC
 Connections" {{RFC9250}}, and "Oblivious DNS over HTTPS" {{RFC9230}} enable DNS
 over encrypted HTTP transports.
-
-By encrypting the communication, these protocols prevent intermediate entities
-from observing the contents of DNS queries, thus improving privacy for users.
 
 The "Unilateral Opportunistic Deployment of Encrypted Recursive-to-Authoritative"
 DNS {{RFC9539}} specification defines how recursive resolvers can communicate
@@ -213,10 +220,7 @@ The initial LocalRoot implementations relied on AXFR for transferring
 root zone data. More recent implementations instead support HTTP-based
 transfers, providing additional flexibility and scalability.
 
-By using LocalRoot, resolvers can improve privacy, reduce dependency
-on external servers, and ensure consistent access to root zone data.
-
-# Centralized vs Decentralized RSS Characteristics {#analysis}
+# RSS Communication Improvement Effectiveness Comparison {#analysis}
 
 This section evaluates the impact of the techniques described in {{techniques}}
 on recursive resolvers' communication with the Root Server System (RSS).
@@ -227,24 +231,24 @@ Queries sent to the RSS include those within existing Top-Level Domains (TLDs)
 (e.g., ".com", ".org") and for queries under non-existent domains (e.g.,
 "sensitive.internal", sensitive.con" (sic)).
 
-When a resolver's cache lacks an answer for the associated TLD, the
+When a resolver's cache lacks an answer for a domain within an associated TLD, the
 query is forwarded to the RSS. This exposes the query to the 12 Root
 Server Operators (RSOs) managing the 26 RSS identifiers (13 IPv4 and
 13 IPv6) and the networks in between.
 
-The privacy sensitivity of queries sent to the RSS can vary widely
+The privacy sensitivity of queries sent to the RSS can vary widely,
 ranging from unlikely sensitive (such as a query for just ".example"
 without any left-hand labels) to more critical queries that leak
 potentially personal or system-sensitive information that was not
 intended to leak beyond an internal network boundary (such as
-".wpad").  Names reaching the RSS could be single labels that reveal
-only the TLD's name (".com" or ".xxx") and may or may not be sensitive
-in nature.  Queries could also contain more labels that leak
+".wpad" records).  Names reaching the RSS can be single labels that reveal
+only the TLD's name (".com" or ".xxx"), which may or may not be sensitive
+in nature by themselves.  Queries can also contain more labels that may leak
 more sensitive information ("private.sensitive.example").
 
 Accidental leaks can stem from typos, web browser keyword searches,
 misconfigured software, or simply because it needed to be resolved,
-and no privacy-protecting techniques listed below were deployed.
+and no privacy-protecting techniques are deployed.
 
 Note that beyond the analysis of a single record being observed, a
 larger or temporal analysis of all of a client's queries may reveal
@@ -258,15 +262,9 @@ various techniques are available for use that include:
 
 - **Aggressive NSEC: Significant**
 
-  [ Ed note: The NSEC example is as of this writing, and may change over time]
-  Aggressive NSEC leverages NSEC records to prevent redundant queries for
-  non-existent TLDs. Validating resolvers can use NSEC records to synthesize
-  negative responses for non-existent TLDs based on previously received NSEC
-  records. For example, a query for a non-existent TLD (e.g.,
-  ".example") will return an NSEC record cryptographically proving that the no
-  names between ".events" and ".exchange" exist. Subsequent queries within the NSEC
-  TTL for a non-existent TLD that falls between ".events" and ".exchange" (e.g.,
-  ".evil") can be answered immediately without sending a query to the RSS.
+  Because Aggressive NSEC greatly reduces the quantity of queries
+  requiring NXDOMAIN responses, it can greatly enhance a resolver's
+  privacy by simply sending less queries.
 
   The rough worst-case scenario with a long lived cache is a transmission of 1
   query per TLD in the root zone in the course of one TTL (2 days, or other
@@ -275,11 +273,14 @@ various techniques are available for use that include:
   more frequently than what the root zone's TTL specifies.  Note that DNSSEC
   (or at least an understanding of the NSEC record) is required to implement
   Aggressive NSEC.
+  
+  Note that Aggressive NSEC does not prevent queries for existing TLDs
+  from leaking.
 
 - **QName Minimization: Significant**
 
   QName Minimisation greatly improves privacy in the case where any
-  sensitive information is in the labels before the TLD
+  sensitive information exists in the labels before the TLD
   (e.g. sensitive.example).  However, this cannot entirely minimize
   the leakage of TLD names themselves, which may or may not be
   sensitive in nature (".xxx" is used as a common example of a TLD
@@ -291,9 +292,9 @@ various techniques are available for use that include:
 - **Encrypted DNS: Moderate**
 
   Encrypted DNS protocols, such as DNS over (D)TLS, protect queries from
-  intermediate observers by encrypting the communication. However, as of this
-  writing, only two of the 13 root server identifiers support encrypted DNS,
-  limiting the effectiveness of this technique.
+  intermediate observers by encrypting communication. However, as of this
+  writing, only 2 of the 13 root server identifiers support encrypted DNS,
+  limiting the effectiveness of this technique with respect to the RSS.
 
 - **LocalRoot: Complete**
 
