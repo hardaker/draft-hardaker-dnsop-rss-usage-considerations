@@ -532,16 +532,16 @@ In summary, the following table summarizes the analysis in
 {{analysis}} given the DNS communication technologies in
 {{techniques}} and how they affect communication with the RSS.
 
-|---------------|--------|--------|----------|--------|--------|-----------|
-|               | QName-Min  | Aggr.-NSEC  | Encrypt  | Serve-Stale  | DNSSEC | LocalRoot |
-|---------------|--------|--------|----------|--------|--------|-----------|
-| Privacy       | Signif | Signif | Moderate |        |        | Complete  |
-| Disconnection |        |        |          | Signif |        | Complete* |
-| Auth Prot     |        |        | Complete |        | Signif | Complete  |
-| Non-auth Prot |        |        | Complete |        | Signif | Complete  |
-| Bit Flipping  |        |        |          |        | Signif | Complete  |
-| Latency       |        | Signif |          |        |        | Complete  |
-|---------------|--------|--------|----------|--------|--------|-----------|
+|---------------|-----------|------------|----------|-------------|--------|-----------|
+|               | QName-Min | Aggr.-NSEC | Encrypt  | Serve-Stale | DNSSEC | LocalRoot |
+|---------------|-----------|------------|----------|-------------|--------|-----------|
+| Privacy       | Signif    | Signif     | Moderate |             |        | Complete  |
+| Disconnection |           |            |          | Signif      |        | Complete* |
+| Auth Prot     |           |            | Complete |             | Signif | Complete  |
+| Non-auth Prot |           |            | Complete |             | Signif | Complete  |
+| Bit Flipping  |           |            |          |             | Signif | Complete  |
+| Latency       |           | Signif     |          |             |        | Complete  |
+|---------------|-----------|------------|----------|-------------|--------|-----------|
 
 (*): as discussed above, this depends on the implementation with some
 implementations only being Significant while others are Complete.
