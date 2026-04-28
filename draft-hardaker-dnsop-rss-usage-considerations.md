@@ -394,14 +394,18 @@ ensuring tamper resistance. Solutions for safeguarding these records include:
 
 - **DNSSEC: Significant**
 
-  DNSSEC prevents unauthorized modification of records served by the RSS,
-  provided validation is performed using a root zone DNSSEC trust anchor and
-  extends to the child zone. While not all root zone records are protected,
-  most TLDs support DNSSEC, making this solution significant.
 
-  Additionally, DNSSEC combined with NSEC records enables verification of
-  negative responses from the root, as non-existent records are authoritative
-  at the root.
+  DNSSEC protects against record modification for records served from
+  the RSS, assuming validation is performed using a root zone DNSSEC
+  trust anchor and followed all the way to the child zone.  Note that
+  not all records in the root zone are protected, and thus this is
+  considered Significant since most TLDs do offer DNSSEC support and
+  most resolvers are child-centric.
+
+  Note that DNSSEC, when combined with NSEC records, allows
+  verification of negative answers received from the root.  Thus,
+  responses for non-existent records from the root are verifiable as
+  authentic.
 
 - **LocalRoot: Complete**
 
@@ -413,32 +417,55 @@ ensuring tamper resistance. Solutions for safeguarding these records include:
 
   If the resolver is able to connect to a root server instance that
   offers authenticated and encrypted DNS support, then any answers
-  they receive over that protected path can be considered properly
-  validated, even without checking the corresponding DNSSEC records.
-  Although checking the DNSSEC records for validity themselves is
-  still recommended.  And this presumes that some trust mechanism is
-  used to bootstrap the authentication of the RSS instance used.
-  { WK: I think that we need to discuss this. I'm not sure I'm following}
+  they receive over that protected path can be considered properly 
+  validated even without checking the corresponding DNSSEC records.
+  Although, checking the DNSSEC records for validity themselves is
+  still recommended.  Encrypted DNS protection is considered Complete
+  when the authentication of the TLS connection to the RSS can be properly 
+  verified.
 
 ### Non-Authoritative Data (Glue) Protection {#glue}
 
-While DNSSEC protects many records within the root zone, it does not sign the NS, A, and AAAA records. This lack of signing leaves these records vulnerable to attacks such as man-in-the-middle modifications or cache injection. These attacks could redirect traffic to non-responsive servers, causing denial-of-service issues.
 
-Alternatively, attackers could modify these records to point to alternate, responsive addresses. While these addresses cannot alter DNSSEC-validated records, they could proxy legitimate requests while recording transactions, enabling surveillance. NS and glue records are typically cached for extended periods, which benefits resolvers receiving correct records but poses risks for those with modified records, especially when parent-side preferences are used.
+Although DNSSEC protects many of the records within the root zone, the
+TLD's NS, A and AAAA records in the root zone are not signed. 
+This lack of signing leaves these records vulnerable to attacks such as man-in-the-middle modifications 
+or cache injection. These attacks could redirect traffic to non-responsive servers, 
+causing denial-of-service issues.
+
+Alternatively, the addresses can be modified to point to alternate
+addresses that do respond.  While these responding addresses will
+be unable to alter DNSSEC signed records in the root zone, 
+they can still modify the unsigned glue records.
+
+Note that
+NS and glue records from the root zone are typically cached for a
+lengthy period of time, which is a benefit for resolvers that receive
+the correct records but a detriment for those that receive modified
+records and have a parent-side preference.
 
 Mitigation strategies include:
 
 - **DNSSEC: None to Significant**
 
-  DNSSEC prevents unauthorized modification of critical data, ensuring that unsigned data cannot be falsely inserted. However, it does not protect NS and glue records directly. The level of protection depends on whether the resolver validates child-side NS, A, and AAAA records using DNSSEC or relies solely on cached parent records. Additionally, the TLD must be signed for this protection to be effective.
+  DNSSEC prevents unauthorized modification of authoritative records in
+  DNS zones, ensuring that unsigned data cannot be falsely inserted.  
+  However, as discussed above, it does not prevent NS and
+  glue record modification.  The protection offered by DNSSEC depends
+  on whether the resolver uses DNSSEC to validate the child side NS, A
+  and AAAA records.    Furthermore, the TLD must be signed for this protection to be effective.
 
 - **LocalRoot: Complete**
 
-  LocalRoot {{localroot}} implementations download and verify the entire root zone, including NS and glue records, effectively eliminating this threat.
+  LocalRoot implementations download and verify the entire contents of
+  the root zone, including NS and glue records, effectively eliminating this threat.
 
 - **Encrypted DNS: Complete**
 
-  Encrypted DNS ensures secure communication with root server instances, provided their identities are properly verified. Data received over these secure channels can be considered authentic and encrypted. However, since glue records lack RRSIGs, DNSSEC validation is not possible post-reception, requiring consultation with the child zone for verification.
+  Encrypted DNS ensures secure communication with root server instances, provided their 
+  identities are properly verified. Data received over these secure channels can be considered 
+  authentic and encrypted. However, since glue records lack RRSIGs, DNSSEC validation is not 
+  possible post-reception, requiring consultation with the child zone for verification.
   {{WK: As above - I think that we need to discuss this. I'm not sure I'm following}}
 
 ## Bit Flipping
