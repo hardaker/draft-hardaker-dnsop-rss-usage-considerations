@@ -121,7 +121,7 @@ document categorizes the solutions using the following keywords:
   problem space.
 - **Complete**: The technique fully enhances communication with the RSS and/or
   completely mitigates the defined concern.
-  
+
 # Techniques Improving Communication with the RSS {#techniques}
 
 This section outlines various techniques designed to improve
@@ -153,7 +153,7 @@ number of queries sent to authoritative servers by allowing "DNSSEC-validating
 resolvers to generate negative answers within a range and positive answers from
 wildcards."
 
-[ Ed note: The NSEC example used in this paragraph is an accurate example as of this writing, but may change over time.]
+(Ed note: The NSEC example used in this paragraph is an accurate example as of this writing, but may change over time.)
 Aggressive NSEC leverages NSEC records to prevent redundant queries for
 non-existent TLDs. Validating resolvers can use NSEC records to synthesize
 negative responses for non-existent TLDs based on previously received NSEC
@@ -167,7 +167,7 @@ This technique is particularly effective in reducing queries to the RSS for
 non-existent TLDs, as once a single query between two valid TLDs has been sent,
 validating resolvers can make use of the returned NSEC records to prevent
 future queries between the two bounding TLDs from needing resolution. This
-improves both privacy ({{privacy}}) and latency ({{latency}}) 
+improves both privacy ({{privacy}}) and latency ({{latency}})
 when communicating with the RSS, as fewer
 queries are sent and more responses can be generated immediately from the cache.
 
@@ -273,7 +273,7 @@ various techniques are available for use that include:
   more frequently than what the root zone's TTL specifies.  Note that DNSSEC
   (or at least an understanding of the NSEC record) is required to implement
   Aggressive NSEC.
-  
+
   Note that Aggressive NSEC does not prevent queries for existing TLDs
   from leaking.
 
@@ -316,7 +316,7 @@ various causes, such as network outages, intentional disruptions, or natural
 disasters. In such scenarios, the Root Server System (RSS), as the pinnacle of
 the DNS hierarchy, becomes inaccessible to resolvers needing information about
 TLDs not in their cache. While a complete disconnection from the internet
-results in failures for all resolutions to external resources, 
+results in failures for all resolutions to external resources,
 local infrastructure may still be functioning and
 remain reachable (e.g., a ccTLD may be accessible even if the RSS is not).
 
@@ -384,11 +384,11 @@ ensuring tamper resistance. Solutions for safeguarding these records include:
 
   If the resolver is able to connect to a root server instance that
   offers authenticated and encrypted DNS support, then any answers
-  they receive over that protected path can be considered properly 
+  they receive over that protected path can be considered properly
   validated even without checking the corresponding DNSSEC records.
   However, checking the DNSSEC records for validity themselves may
   still be recommended.  Encrypted DNS protection is considered Complete
-  when the authentication of the TLS connection to the RSS can be properly 
+  when the authentication of the TLS connection to the RSS can be properly
   verified.
 
 - **LocalRoot: Complete**
@@ -400,17 +400,17 @@ ensuring tamper resistance. Solutions for safeguarding these records include:
 ### Non-Authoritative Data (Glue) Protection {#glue}
 
 Although DNSSEC protects many of the records within the root zone, the
-TLD's NS, A and AAAA records in the root zone are not signed. 
+TLD's NS, A and AAAA records in the root zone are not signed.
 This lack of signing leaves these records vulnerable to attacks
-such as man-in-the-middle modifications 
-or cache injection. 
+such as man-in-the-middle modifications
+or cache injection.
 
-These attacks could redirect traffic to non-responsive servers, 
+These attacks could redirect traffic to non-responsive servers,
 causing denial-of-service issues.
 
 Alternatively, the addresses can be modified to point to alternate
 addresses that do respond.  While these responding addresses will
-be unable to alter DNSSEC signed records in the root zone, 
+be unable to alter DNSSEC signed records in the root zone,
 they can still act as eavesdroppers and modify any unsigned glue
 records being passed.
 
@@ -425,7 +425,7 @@ Mitigation strategies include:
 - **DNSSEC: None to Significant**
 
   DNSSEC prevents unauthorized modification of authoritative records in
-  DNS zones, ensuring that unsigned data cannot be falsely inserted. 
+  DNS zones, ensuring that unsigned data cannot be falsely inserted.
   However, as discussed above, it does not prevent NS and
   glue record modification.  The protection offered by DNSSEC depends
   on whether the resolver uses DNSSEC to validate the child side's NS, A
@@ -435,18 +435,18 @@ Mitigation strategies include:
 - **Encrypted DNS: Complete**
 
   Encrypted DNS provides secure communication with
-  root server instances, provided their 
-  identities are properly verified. 
-  Data received over these secure channels can be considered 
-  authentic and encrypted. 
+  root server instances, provided their
+  identities are properly verified.
+  Data received over these secure channels can be considered
+  authentic and encrypted.
   However, since NS glue records in the parent
-  zone lack RRSIGs, DNSSEC validation still requires 
+  zone lack RRSIGs, DNSSEC validation still requires
   consultation with the child zone for data authenticity verification.
 
 - **LocalRoot: Complete**
 
   LocalRoot implementations download and verify the entire contents of
-  the root zone, including NS and glue records, 
+  the root zone, including NS and glue records,
   effectively eliminating this threat.
 
 ## Bit Flipping
@@ -479,7 +479,7 @@ Solutions to detecting and rejecting bitflipped data include:
   data with modifications of any kind, including bit flipping
   techniques.
   However, DNSSEC does not prevent NS and glue record
-  modification since these records, as discussed above, 
+  modification since these records, as discussed above,
   are not protected by DNSSEC
   unless verified through to the client's copy of the records.
 
@@ -489,7 +489,7 @@ Solutions to detecting and rejecting bitflipped data include:
 - **LocalRoot: Complete**
 
   LocalRoot implementations within resolvers download and verify the
-  entire contents of the root zone using DNSSEC and ZONEMD, 
+  entire contents of the root zone using DNSSEC and ZONEMD,
   including associated glue records, and thus
   eliminates this threat entirely for incoming queries.
 
