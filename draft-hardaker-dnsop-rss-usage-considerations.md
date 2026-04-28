@@ -121,7 +121,7 @@ document categorizes the solutions using the following keywords:
   problem space.
 - **Complete**: The technique fully enhances communication with the RSS and/or
   completely mitigates the defined concern.
-
+  
 # Techniques Improving Communication with the RSS {#techniques}
 
 This section outlines various techniques designed to improve
@@ -134,14 +134,16 @@ mitigating each of the concerns.
 
 The original DNS protocol specifications {{RFC1035}} indicated that
 the entire query name being handled by a resolver should be sent to
-upstream authoritative servers; this leaks all labels in a query to
-all the authoritative servers used in the resolution process even when
-the authoritative server doesn't need all the labels to generate a
-response.  The "DNS Query Name Minimisation to Improve Privacy"
-{{RFC9156}} specification describes how recursive resolvers can
-minimize this privacy leakage by describing how the resolver "no
-longer always sends the full original QNAME and original QTYPE to the
-upstream name server."
+upstream authoritative servers; this behavior leaks all the labels in a query to
+all the authoritative servers used in the resolution process, even when
+the authoritative server doesn't use all the labels when generating a
+response.
+
+The "DNS Query Name Minimisation to Improve Privacy" {{RFC9156}}
+specification describes how recursive resolvers can minimize this
+privacy leakage by describing how the resolver "no longer always sends
+the full original QNAME and original QTYPE to the upstream name
+server."
 
 ## Aggressive NSEC
 
@@ -155,14 +157,14 @@ This technique is particularly effective in reducing queries to the RSS for
 non-existent TLDs, as once a single query between two valid TLDs has been sent,
 validating resolvers can make use of the returned NSEC records to prevent
 future queries between the two bounding TLDs from needing resolution. This
-improves both privacy and latency when communicating with the RSS, as fewer
-queries are sent and more responses can be generated from the cache.
-
+improves both privacy ({{privacy}}) and latency ({{latency}}) 
+when communicating with the RSS, as fewer
+queries are sent and more responses can be generated immediately from the cache.
 
 ## Encrypted DNS
 
 There are a variety of protocols that enable encrypted DNS
-transactions both between stubs and recursive resolvers, and recursive
+transactions both between stubs and recursive resolvers, and between recursive
 resolvers and authoritative servers. These include "DNS over Transport
 Layer Security" (TLS) {{RFC7858}} and "DNS over Datagram Transport
 Layer Security (DTLS)" {{RFC8094}} (along with supplemental
@@ -219,7 +221,7 @@ on external servers, and ensure consistent access to root zone data.
 This section evaluates the impact of the techniques described in {{techniques}}
 on recursive resolvers' communication with the Root Server System (RSS).
 
-## Privacy
+## Privacy {#privacy}
 
 Queries sent to the RSS include those within existing Top-Level Domains (TLDs)
 (e.g., ".com", ".org") and for queries under non-existent domains (e.g.,
@@ -288,7 +290,7 @@ various techniques are available for use that include:
 
 - **Encrypted DNS: Moderate**
 
-  Encrypted DNS protocols, such as DNS over TLS, protect queries from
+  Encrypted DNS protocols, such as DNS over (D)TLS, protect queries from
   intermediate observers by encrypting the communication. However, as of this
   writing, only two of the 13 root server identifiers support encrypted DNS,
   limiting the effectiveness of this technique.
@@ -306,7 +308,7 @@ various techniques are available for use that include:
   creating the root zone, although even they have no visibility into
   how resolvers make use of the data.
 
-## Latency
+## Latency {#latency}
 
 Even though almost all answers to user queries are served from the cache, some
 resolver operators are concerned about the latency of queries sent to the RSS.
