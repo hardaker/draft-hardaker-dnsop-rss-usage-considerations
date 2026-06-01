@@ -171,7 +171,7 @@ improves both privacy ({{privacy}}) and latency ({{latency}})
 when communicating with the RSS, as fewer
 queries are sent and more responses can be generated immediately from the cache.
 
-## Encrypted DNS
+## Encrypted and Authenticated DNS
 
 There are a variety of protocols that enable encrypted DNS
 transactions both between stubs and recursive resolvers, and between recursive
@@ -189,6 +189,15 @@ The "Unilateral Opportunistic Deployment of Encrypted Recursive-to-Authoritative
 DNS {{RFC9539}} specification defines how recursive resolvers can communicate
 with authoritative servers that support encrypted TLS sessions. However,
 the specification is currently published under an EXPERIMENTAL status.
+
+In all cases for the purpose of this document, we define these these
+connections to be verified both in terms of authenticity of the server
+end point (although not necessarily of the data's origin itself).  As
+such this survey frequently rates authenticated and encrypted TLS
+solutions as strong candidates for solving communication problems,
+large scale deployments of resolver to authoritative DNS servers in
+particular lack a robust way for performing proper TLS server
+certificate authentication, which makes actual deployment a challenge.
 
 ## Serve Stale
 
@@ -289,12 +298,13 @@ various techniques are available for use that include:
   period of time.  Unlike NSEC Aggressive Caching though, DNSSEC is
   not required to implement QName Minimization.
 
-- **Encrypted DNS: Moderate**
+- **Encrypted and authenticated DNS: Moderate**
 
-  Encrypted DNS protocols, such as DNS over (D)TLS, protect queries from
-  intermediate observers by encrypting communication. However, as of this
-  writing, only 2 of the 13 root server identifiers support encrypted DNS,
-  limiting the effectiveness of this technique with respect to the RSS.
+  Encrypted and authenticated DNS protocols, such as DNS over (D)TLS,
+  protect queries from intermediate observers by encrypting
+  communication. However, as of this writing, only 2 of the 13 root
+  server identifiers support encrypted DNS, limiting the effectiveness
+  of this technique with respect to the RSS.
 
 - **LocalRoot: Complete**
 
@@ -380,16 +390,16 @@ ensuring tamper resistance. Solutions for safeguarding these records include:
   responses for non-existent records from the root are verifiable as
   authentic.
 
-- **Encrypted DNS: Complete**
+- **Encrypted and Authenticated DNS: Complete**
 
   If the resolver is able to connect to a root server instance that
   offers authenticated and encrypted DNS support, then any answers
   they receive over that protected path can be considered properly
   validated even without checking the corresponding DNSSEC records.
   However, checking the DNSSEC records for validity themselves may
-  still be recommended.  Encrypted DNS protection is considered Complete
-  when the authentication of the TLS connection to the RSS can be properly
-  verified.
+  still be recommended.  Encrypted and authenticated DNS protection is
+  considered Complete when the authentication of the TLS connection to
+  the RSS can be properly verified.
 
 - **LocalRoot: Complete**
 
@@ -403,7 +413,7 @@ Although DNSSEC protects many of the records within the root zone, the
 TLD's NS, A and AAAA records in the root zone are not signed.
 This lack of signing leaves these records vulnerable to attacks
 such as man-in-the-middle modifications
-or cache injection.
+or cache injection, especially with parent-centric validating resolvers.
 
 These attacks could redirect traffic to non-responsive servers,
 causing denial-of-service issues.
@@ -432,16 +442,14 @@ Mitigation strategies include:
   and AAAA records.
   Furthermore, the TLD must be signed for this protection to be effective.
 
-- **Encrypted DNS: Complete**
+- **Encrypted and authenticated DNS: Complete**
 
-  Encrypted DNS provides secure communication with
-  root server instances, provided their
-  identities are properly verified.
-  Data received over these secure channels can be considered
-  authentic and encrypted.
-  However, since NS glue records in the parent
-  zone lack RRSIGs, DNSSEC validation still requires
-  consultation with the child zone for data authenticity verification.
+  Encrypted and authenticated DNS provides secured communication with
+  root server instances, assuming server endpoints are properly
+  verified.  Note, however, since NS glue records in the parent zone
+  lack RRSIGs, proper validation the veracity of the data still
+  requires consultation with the child zone for data authenticity
+  verification.
 
 - **LocalRoot: Complete**
 
@@ -486,12 +494,22 @@ Solutions to detecting and rejecting bitflipped data include:
   Research has shown that some validating resolvers fail to detect when some
   bit flipping situations have occurred, however.
 
-- **LocalRoot: Complete**
+- **Encrypted and authenticated DNS: Significant**
+
+  Encrypted and authenticated DNS provides secured communication with
+  root server instances that ensures no data has been modified in
+  flight.  However, any data containing bit-flips in the root server
+  instance itself, in the resolver's memory, or in the outgoing data
+  transmissions cannot be protected.
+
+- **LocalRoot: Significant**
 
   LocalRoot implementations within resolvers download and verify the
-  entire contents of the root zone using DNSSEC and ZONEMD,
-  including associated glue records, and thus
-  eliminates this threat entirely for incoming queries.
+  entire contents of the root zone using DNSSEC and ZONEMD, including
+  associated glue records.  This eliminates (or at least catches) all
+  bit flips that occur on incoming data transfers for the root zone.
+  However, it cannot protect against bit flips that occur in-memory or
+  in outgoing responses, and is thus only Significant.
 
 ## Latency {#latency}
 
@@ -532,16 +550,16 @@ In summary, the following table summarizes the analysis in
 {{analysis}} given the DNS communication technologies in
 {{techniques}} and how they affect communication with the RSS.
 
-|---------------|-----------|------------|----------|-------------|--------|-----------|
-|               | QName-Min | Aggr.-NSEC | Encrypt  | Serve-Stale | DNSSEC | LocalRoot |
-|---------------|-----------|------------|----------|-------------|--------|-----------|
-| Privacy       | Signif    | Signif     | Moderate |             |        | Complete  |
-| Disconnection |           |            |          | Signif      |        | Complete* |
-| Auth Prot     |           |            | Complete |             | Signif | Complete  |
-| Non-auth Prot |           |            | Complete |             | Signif | Complete  |
-| Bit Flipping  |           |            |          |             | Signif | Complete  |
-| Latency       |           | Signif     |          |             |        | Complete  |
-|---------------|-----------|------------|----------|-------------|--------|-----------|
+|---------------|-----------|------------|-----------|-------------|--------|-----------|
+|               | QName-Min | Aggr.-NSEC | Encr/Auth | Serve-Stale | DNSSEC | LocalRoot |
+|---------------|-----------|------------|-----------|-------------|--------|-----------|
+| Privacy       | Signif    | Signif     | Moderate  |             |        | Complete  |
+| Disconnection |           |            |           | Signif      |        | Complete* |
+| Auth Prot     |           |            | Complete  |             | Signif | Complete  |
+| Non-auth Prot |           |            | Complete  |             | Signif | Complete  |
+| Bit Flipping  |           |            | Signif    |             | Signif | Signif    |
+| Latency       |           | Signif     |           |             |        | Complete  |
+|---------------|-----------|------------|-----------|-------------|--------|-----------|
 
 (*): as discussed above, this depends on the implementation with some
 implementations only being Significant while others are Complete.
@@ -566,4 +584,5 @@ None.
 # Acknowledgments
 {:numbered="false"}
 
-TBD
+Thank you to John Heidemann who provided valuable feedback.
+
